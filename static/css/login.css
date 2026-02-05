@@ -1,0 +1,107 @@
+/* static/css/login.css (REPLACED) */
+
+body {
+  font-family: "Poppins", sans-serif;
+  /* NEW: Use the same background as the index page */
+  background-image: url("https://wallpapers.com/images/hd/verdant-rice-fields-and-farm-surrounding-small-village-8uuv5wg8j0tqwpo5.jpg");
+  background-size: cover;
+  background-position: center;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.auth-container {
+  /* NEW: Glassmorphism effect */
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+}
+
+/* NEW: Style the logo */
+h1 {
+  color: #2c5e2e;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  text-align: left;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+input {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s;
+  background: #f9f9f9;
+}
+
+input:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+  background: #fff;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+p {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+a {
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a:hover {
+  text-decoration: underline;
+}

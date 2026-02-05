@@ -1,0 +1,539 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Live Vision AI{% endblock %}
+
+{% block styles %}
+<style>
+    /* --- Page-Specific Styles (Unchanged) --- */
+    .vision-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 900px;
+        margin: 1rem auto;
+        gap: 1.5rem;
+    }
+    
+    /* --- Video Player (Unchanged) --- */
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        background-color: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        aspect-ratio: 4 / 3;
+        max-height: 60vh;
+        border: 1px solid #333;
+    }
+    #live-video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        transform: scaleX(-1);
+    }
+    #live-video.environment {
+        transform: scaleX(1);
+    }
+
+    .video-status {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        background: rgba(0,0,0,0.5);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        z-index: 10;
+        text-align: center;
+    }
+
+    /* --- Control Panel Card --- */
+    .control-panel {
+        width: 100%;
+        max-width: 800px;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .lang-selector-wrapper {
+        display: flex;
+        /* ✅ MODIFIED: Use space-between to align language and stop button */
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .lang-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .lang-selector-wrapper label {
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+    #lang-select {
+        padding: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background: #fff;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    #stop-speech-btn {
+        background-color: #d32f2f; /* Red button for stopping */
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+    #stop-speech-btn:hover {
+        background-color: #f44336;
+    }
+
+
+    .controls-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+    }
+    .button-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    #record-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 220px;
+        height: 60px;
+        padding: 0 1.5rem;
+        border-radius: 30px;
+        border: none;
+        background-color: #f44336; /* Red */
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        order: 2;
+    }
+    #record-btn.listening {
+        background-color: #4CAF50;
+        animation: pulse 1.5s infinite;
+    }
+    #record-btn:disabled {
+        background-color: #999;
+        cursor: not-allowed;
+    }
+    .record-icon { font-size: 1.5rem; }
+    
+    .btn-camera-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        background: #fff;
+        color: #333;
+        font-size: 1.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        order: 1;
+    }
+    .btn-camera-toggle:hover {
+        background: #f1f1f1;
+        border-color: #aaa;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
+
+    /* --- Result Box (Unchanged) --- */
+    .result-box {
+        width: 100%;
+        max-width: 800px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+        min-height: 100px;
+    }
+    .result-box-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #2c5e2e;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .result-box-header .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #4caf50;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    .result-box-header h3 {
+        margin: 0;
+        font-size: 1.4rem;
+    }
+    .result-box .placeholder { color: #777; }
+    .result-box .thinking {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: #555;
+    }
+    .result-box .loader-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4CAF50;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% csrf_token %}
+
+<div class="vision-container">
+
+    <div class="video-wrapper">
+        <video id="live-video" autoplay muted playsinline></video>
+        <div class="video-status" id="video-status">
+            Starting camera...
+        </div>
+        <canvas id="capture-canvas" style="display: none;"></canvas>
+    </div>
+
+    <div class="control-panel">
+        
+        <div class="lang-selector-wrapper">
+            <div class="lang-controls">
+                <label for="lang-select">Language:</label>
+                <select id="lang-select">
+                    <option value="en-US">English</option>
+                    <option value="hi-IN">हिन्दी (Hindi)</option>
+                    <option value="mr-IN">मराठी (Marathi)</option>
+                    <option value="ta-IN">தமிழ் (Tamil)</option>
+                    <option value="te-IN">తెలుగు (Telugu)</option>
+                    <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+                </select>
+            </div>
+            <button id="stop-speech-btn" title="Stop Speaking">🔇 Stop Speaking</button>
+        </div>
+
+        <div class="controls-wrapper">
+            <div class="button-row">
+                <button class="btn-camera-toggle" id="switch-camera-btn" title="Switch Camera">🔄</button>
+                <button id="record-btn" disabled>
+                    <span class="record-icon">🎤</span>
+                    <span id="record-btn-text">Initializing...</span>
+                </button>
+            </div>
+            <p style="color: #555; text-align: center; margin-top: 1rem; margin-bottom: 0;">
+                <strong>Hold the button</strong> to ask a question, and <strong>release to capture</strong>.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="result-box">
+        <div class="result-box-header">
+             <div class="avatar">S</div>
+            <h3>Sakhi's Analysis</h3>
+        </div>
+        
+        <div id="result-content">
+            <p class="placeholder">Your result will appear here...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // --- Elements ---
+    const video = document.getElementById('live-video');
+    const videoStatus = document.getElementById('video-status');
+    const recordBtn = document.getElementById('record-btn');
+    const recordBtnText = document.getElementById('record-btn-text');
+    const resultContent = document.getElementById('result-content');
+    const switchCameraBtn = document.getElementById('switch-camera-btn');
+    const canvas = document.getElementById('capture-canvas');
+    const langSelect = document.getElementById('lang-select');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // ✅ NEW ELEMENT: Stop Speech Button
+    const stopSpeechBtn = document.getElementById('stop-speech-btn');
+
+
+    // --- State ---
+    let stream = null;
+    let currentFacingMode = 'environment';
+    let recognition = null;
+    let synth = window.speechSynthesis;
+    let final_transcript = '';
+    
+    let voices = [];
+    function populateVoiceList() {
+        voices = synth.getVoices();
+        console.log("Voices loaded:", voices.length);
+    }
+    populateVoiceList();
+    if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = populateVoiceList;
+    }
+
+    // --- 1. Speech-to-Text (STT) Setup (Unchanged) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        
+        recognition.onresult = (event) => {
+            let interim_transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                } else {
+                    interim_transcript += event.results[i][0].transcript;
+                }
+            }
+            recordBtnText.textContent = interim_transcript || 'Listening...';
+        };
+        
+        recognition.onerror = (event) => {
+            console.error("Speech Recognition Error:", event.error);
+            recordBtnText.textContent = 'Speech Error';
+        };
+    } else {
+        console.error("Speech Recognition not supported.");
+        recordBtn.disabled = true;
+        recordBtnText.textContent = 'Not Supported';
+    }
+
+    // --- 2. Text-to-Speech (TTS) ---
+   function speakText(text, lang) {
+        if (synth.speaking) synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // prioritize female voices for "Sakhi"
+        let femaleVoice = voices.find(v => 
+            v.lang.startsWith(lang.split('-')[0]) && 
+            (v.name.toLowerCase().includes('female') || 
+             v.name.toLowerCase().includes('zira') || 
+             v.name.toLowerCase().includes('google'))
+        );
+        
+        utterance.voice = femaleVoice || voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+        utterance.lang = lang;
+        utterance.rate = 1.0; // Clear, natural pace
+        synth.speak(utterance);
+    }
+    
+    // ✅ NEW: Event listener for the Stop Speech button
+    stopSpeechBtn.addEventListener('click', () => {
+        if (synth.speaking) {
+            synth.cancel();
+            console.log("Speech stopped by user.");
+        }
+    });
+
+
+    // --- 3. Camera Controls (START, STOP, SWITCH) (Unchanged) ---
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+
+    async function startCamera(facingMode) {
+        stopCamera();
+        videoStatus.style.display = 'block';
+        videoStatus.textContent = 'Starting camera...';
+        
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { exact: facingMode } },
+                audio: false
+            });
+            video.srcObject = stream;
+            
+            video.onloadedmetadata = () => {
+                video.play();
+                videoStatus.style.display = 'none';
+                recordBtn.disabled = false;
+                recordBtnText.textContent = 'Hold to Ask';
+                video.classList.toggle('environment', facingMode === 'environment');
+            };
+            
+        } catch (err) {
+            console.error(`Error accessing ${facingMode} camera:`, err);
+            if (facingMode === 'environment') {
+                currentFacingMode = 'user';
+                startCamera('user');
+            } else {
+                videoStatus.textContent = 'Error: No camera access.';
+            }
+        }
+    }
+
+    switchCameraBtn.addEventListener('click', () => {
+        currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+        startCamera(currentFacingMode);
+    });
+
+    window.addEventListener('beforeunload', stopCamera);
+
+    // --- 4. "Hold to Speak" Logic (Unchanged) ---
+    function startListening(e) {
+        e.preventDefault();
+        if (recognition && !recordBtn.disabled) {
+            try {
+                final_transcript = '';
+                recognition.lang = langSelect.value;
+                recognition.start();
+                recordBtn.classList.add('listening');
+                recordBtnText.textContent = 'Listening...';
+            } catch (e) { console.error("Recognition already started.", e); }
+        }
+    }
+
+    function stopListeningAndAnalyze(e) {
+        e.preventDefault();
+        if (recognition && !recordBtn.disabled) {
+            recognition.stop();
+            recordBtn.classList.remove('listening');
+            recordBtnText.textContent = 'Hold to Ask';
+            
+            setResultLoading('Capturing frame...');
+            
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Flip image if it's from the front camera
+            if (currentFacingMode === 'user') {
+                context.scale(-1, 1);
+                context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            } else {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+            
+            const imageDataURL = canvas.toDataURL('image/jpeg', 0.9);
+            const question = final_transcript || "What do you see?";
+            
+            setResultLoading('Analyzing image and question...');
+            sendToAI(question, imageDataURL);
+        }
+    }
+
+    recordBtn.addEventListener('mousedown', startListening);
+    recordBtn.addEventListener('mouseup', stopListeningAndAnalyze);
+    recordBtn.addEventListener('touchstart', startListening, { passive: false });
+    recordBtn.addEventListener('touchend', stopListeningAndAnalyze, { passive: false });
+
+
+    // --- 5. AI Communication (Unchanged) ---
+    async function sendToAI(text, imageData) {
+        try {
+            const response = await fetch('/api/live-vision/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    text: text,
+                    image_data: imageData,
+                    lang: langSelect.value
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ reply: "Server error" }));
+                throw new Error(errorData.reply || `Server error (${response.status})`);
+            }
+
+            const data = await response.json();
+            let htmlReply = markdownToHTML(data.reply);
+            resultContent.innerHTML = htmlReply;
+            
+            let textToSpeak = data.reply.replace(/[\*#]/g, '');
+            speakText(textToSpeak, langSelect.value); 
+
+        } catch (error) {
+            console.error("Error sending to AI:", error);
+            const errorMsg = `Error: ${error.message}`;
+            resultContent.innerHTML = `<p style="color: red;">${errorMsg}</p>`;
+            speakText(errorMsg, langSelect.value);
+        }
+    }
+
+    function setResultLoading(message) {
+        resultContent.innerHTML = `<div class="thinking"><div class="loader-spinner"></div><p>${message}</p></div>`;
+    }
+
+    function markdownToHTML(text) {
+        let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/^\*\s(.*)$/gm, '<p style="margin: 0; padding: 2px 0;">• $1</p>');
+        html = html.split('\n').map(line => line.trim().startsWith('<p') ? line : (line.trim() ? `<p>${line}</p>` : '')).join('');
+        return html;
+    }
+
+    // --- 6. Initial Camera Start (Unchanged) ---
+    window.addEventListener('load', () => {
+        startCamera(currentFacingMode);
+    });
+
+</script>
+{% endblock %}

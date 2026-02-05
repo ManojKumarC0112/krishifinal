@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Personalize My Farm{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .form-container h2 {
+        margin-top: 0;
+        color: #2c5e2e;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 1rem;
+    }
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 0.85rem;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+</style>
+
+<div class="form-container">
+    <h2>Personalize Your Farm</h2>
+    <p>Tell us about your farm so Sakhi can provide tailored advice for soil, weather, and market conditions.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="soil-type">Your Primary Soil Type</label>
+            <select id="soil-type" name="soil-type">
+                <option value="Alluvial Soil" {% if profile.soil_type == "Alluvial Soil" %}selected{% endif %}>Alluvial Soil</option>
+                <option value="Black (Regur) Soil" {% if profile.soil_type == "Black (Regur) Soil" %}selected{% endif %}>Black (Regur) Soil</option>
+                <option value="Red and Yellow Soil" {% if profile.soil_type == "Red and Yellow Soil" %}selected{% endif %}>Red and Yellow Soil</option>
+                <option value="Laterite Soil" {% if profile.soil_type == "Laterite Soil" %}selected{% endif %}>Laterite Soil</option>
+                <option value="Arid (Desert) Soil" {% if profile.soil_type == "Arid (Desert) Soil" %}selected{% endif %}>Arid (Desert) Soil</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="main-crops">What are you currently growing? (comma separated)</label>
+            <textarea id="main-crops" name="main-crops" placeholder="e.g., Rice, Cotton, Tomatoes...">{{ profile.main_crops }}</textarea>
+        </div>
+        
+        <p style="font-size: 0.9rem; color: #555;">
+            This information will be used to personalize all AI recommendations and market demand alerts.
+        </p>
+        <button type="submit" class="btn-submit">Save Preferences</button>
+    </form>
+</div>
+{% endblock %}

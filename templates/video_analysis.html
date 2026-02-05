@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Crop Guardian: Video Analysis{% endblock %}
+
+{% block content %}
+<style>
+    /* Wizard Styles */
+    .predict-container-wizard {
+        max-width: 800px; margin: 2rem auto; background-color: #fff; border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #eee;
+    }
+    #video-input { display: none; }
+    /* Progress Bar */
+    .progress-bar-container {
+        padding: 2rem 2.5rem 1.5rem 2.5rem; background-color: #fcfcfc; border-bottom: 1px solid #eee;
+    }
+    .progress-bar-steps {
+        display: flex; justify-content: space-between; align-items: center; position: relative;
+    }
+    .progress-bar-steps::before {
+        content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background-color: #f0f0f0; z-index: 1; transform: translateY(-50%);
+    }
+    .progress-bar-line {
+        position: absolute; top: 50%; left: 0; width: 0%; height: 4px; background-color: #4CAF50; z-index: 2; transform: translateY(-50%); transition: width 0.4s ease;
+    }
+    .step { display: flex; flex-direction: column; align-items: center; z-index: 3; }
+    .step-circle {
+        width: 40px; height: 40px; border-radius: 50%; background-color: #f0f0f0; border: 4px solid #f0f0f0;
+        color: #999; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem;
+    }
+    .step.active .step-circle { background-color: #fff; border-color: #4CAF50; color: #4CAF50; }
+    .step.completed .step-circle { background-color: #4CAF50; border-color: #4CAF50; color: #fff; }
+    .step-label { margin-top: 0.5rem; font-weight: 600; color: #333; font-size: 0.9rem; }
+    
+    /* Form Content */
+    .form-step { display: none; padding: 2rem 2.5rem; animation: fadeIn 0.5s ease; }
+    .form-step.active { display: block; }
+    .form-navigation { display: flex; justify-content: space-between; margin-top: 2rem; }
+    .custom-file-upload {
+        border: 2px dashed #a7d3a6; border-radius: 8px; padding: 3rem; text-align: center;
+        cursor: pointer; background-color: #f1f8e9; transition: background-color 0.3s ease; display: block;
+    }
+    .custom-file-upload:hover { background-color: #e8f5e9; border-color: #4CAF50; }
+    .upload-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+</style>
+
+<div class="predict-container-wizard">
+    <div class="progress-bar-container">
+        <div class="progress-bar-steps">
+            <div class="progress-bar-line" id="progress-line"></div>
+            <div class="step active" id="step-label-1"><div class="step-circle">1</div><div class="step-label">File Check</div></div>
+            <div class="step" id="step-label-2"><div class="step-circle">2</div><div class="step-label">Upload Video</div></div>
+        </div>
+    </div>
+
+    <form class="predict-form" action="{% url 'demo_analysis' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-step active" id="step-1">
+            <h3 style="color:#2c5e2e; margin-top:0;">Step 1: Check Video Requirements</h3>
+            <p style="color:#555;">Ensure your video meets these criteria for accurate AI analysis.</p>
+            
+            <div style="background:#f9f9f9; padding:1rem; border-radius:8px; margin-bottom:0.5rem; border:1px solid #eee;">
+                <strong>Length:</strong> 30-60 seconds
+            </div>
+            <div style="background:#f9f9f9; padding:1rem; border-radius:8px; margin-bottom:0.5rem; border:1px solid #eee;">
+                <strong>Format:</strong> MP4 or MOV
+            </div>
+            
+            <div class="form-navigation" style="justify-content: flex-end;">
+                <button type="button" class="btn-submit" onclick="nextStep(2)">Proceed to Upload &rarr;</button>
+            </div>
+        </div>
+
+        <div class="form-step" id="step-2">
+            <h3 style="color:#2c5e2e; margin-top:0;">Step 2: Upload Field Video</h3>
+            <p style="color:#555;">Select the video file from your device.</p>
+            
+            <div class="form-group">
+                <label for="video-input" class="custom-file-upload" id="file-upload-box">
+                    <div class="upload-icon">📹</div>
+                    <p style="font-weight:bold; color:#2c5e2e; margin:0;">Click to upload video</p>
+                    <span style="color:#777;">MP4 / MOV supported</span>
+                </label>
+                <input type="file" id="video-input" name="video" accept="video/mp4,video/quicktime" style="display: none;">
+                <span id="file-name" style="display:block; text-align:center; margin-top:10px; font-weight:bold; color:#333;">No file chosen</span>
+            </div>
+            
+            <div class="form-navigation">
+                <button type="button" class="btn-nav btn-prev" onclick="prevStep(1)">&larr; Back</button>
+                <button type="submit" class="btn-submit" id="analyze-btn" disabled>Start Instant Analysis</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Navigation Logic
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+    const stepLabel1 = document.getElementById('step-label-1');
+    const stepLabel2 = document.getElementById('step-label-2');
+    const progressLine = document.getElementById('progress-line');
+
+    function nextStep(step) {
+        if (step === 2) {
+            step1.classList.remove('active'); step2.classList.add('active');
+            stepLabel1.classList.add('completed'); stepLabel2.classList.add('active');
+            progressLine.style.width = '100%';
+        }
+    }
+    function prevStep(step) {
+        if (step === 1) {
+            step2.classList.remove('active'); step1.classList.add('active');
+            stepLabel1.classList.add('active'); stepLabel1.classList.remove('completed');
+            stepLabel2.classList.remove('active'); progressLine.style.width = '0%';
+        }
+    }
+
+    // File Upload Logic
+    const fileUploadBox = document.getElementById('file-upload-box');
+    const fileInput = document.getElementById('video-input');
+    const fileName = document.getElementById('file-name');
+    const analyzeBtn = document.getElementById('analyze-btn');
+
+    fileUploadBox.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'INPUT') fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileName.textContent = fileInput.files[0].name;
+            analyzeBtn.disabled = false; // Enable button
+            fileUploadBox.style.borderColor = '#4CAF50';
+        }
+    });
+</script>
+{% endblock %}

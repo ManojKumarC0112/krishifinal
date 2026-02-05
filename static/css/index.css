@@ -1,0 +1,144 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(0, 100, 0, 0.8); /* Green transparent */
+  color: #fff;
+  position: fixed;
+  width: 100%;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+}
+
+.nav-links li a:hover,
+.nav-links li a.active {
+  color: #a8ff78;
+}
+
+.nav-links li a::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #a8ff78;
+  transition: width 0.3s;
+}
+
+.nav-links li a:hover::after {
+  width: 100%;
+}
+
+/* Hero Section */
+.hero {
+  height: 100vh;
+  background-image: url("https://wallpapers.com/images/hd/verdant-rice-fields-and-farm-surrounding-small-village-8uuv5wg8j0tqwpo5.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 80px; /* So it doesn’t hide behind navbar */
+}
+
+
+.hero-text {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2rem;
+  border-radius: 15px;
+  color: #fff;
+  animation: fadeInUp 1.5s ease-out;
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.hero-text p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  background: #32cd32;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #228b22;
+}
+
+/* About Section */
+.about {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: #f0fff0;
+  color: #333;
+}
+
+.about h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.about p {
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #006400;
+  color: #fff;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

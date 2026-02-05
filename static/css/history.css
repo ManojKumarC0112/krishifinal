@@ -1,0 +1,19 @@
+/* static/css/history.css (FINAL COPY - Simplified) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Keep background image */
+  background-image: url("https://wallpapers.com/images/hd/verdant-rice-fields-and-farm-surrounding-small-village-8uuv5wg8j0tqwpo5.jpg");
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  min-height: 100vh;
+  padding-bottom: 50px;
+}
+
+/* Note: Card and History styles are handled by history.html inline styles */

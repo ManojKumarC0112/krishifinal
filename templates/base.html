@@ -1,0 +1,279 @@
+{% load static %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Krishi Sakhi{% endblock %}</title>
+    
+    <meta name="theme-color" content="#2c5e2e">
+
+    <link rel="stylesheet" href="{% static 'css/global_styles.css' %}">
+    
+    <style>
+        /* Basic Reset (Keeping essential layout styles here for stability) */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        /* --- Navigation Bar (CRITICAL ALIGNMENT FIXES) --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2c5e2e;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed; 
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+        }
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+        }
+        .navbar .nav-links a:hover,
+        .navbar .nav-links a.active {
+            color: #a7d3a6;
+            border-bottom: 2px solid #a7d3a6;
+        }
+        
+        /* FIX: Ensure profile/language menus align horizontally and use flex for spacing */
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+        
+        /* Ensure dropdown structure works */
+        .profile-menu, .language-menu {
+            position: relative;
+            display: inline-block;
+            vertical-align: middle; 
+        }
+        /* End of alignment fixes */
+
+
+        /* --- Main Content Area --- */
+        .content-wrapper {
+            max-width: 1300px;
+            /* Added top margin to account for fixed navbar height */
+            margin: 5.5rem auto 1.5rem auto; 
+            padding: 1rem;
+        }
+    </style>
+
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+    <div id="preloader">
+        <div id="preloader-spinner"></div>
+        <p id="preloader-text">Loading... Please wait.</p>
+        <p id="preloader-fact"></p>
+    </div>
+    <div class="loader-overlay" id="loading-spinner">
+        <div class="loader-spinner"></div>
+        <p class="loader-text" id="loader-text-id">Analyzing... Please wait.</p>
+    </div>
+
+    <nav class="navbar">
+        <a class="logo" href="{% url 'index' %}">
+    <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 50px; vertical-align: middle; margin-right: 10px;">
+    Krishi Sakhi
+</a>
+        <div class="nav-links">
+            <a href="{% url 'index' %}">Home</a>
+            <a href="{% url 'analyze_field_dashboard' %}" style="font-weight: bold; color: #ffc107;">
+                Analyze Field 🧠
+            </a>
+            <a href="{% url 'crop_prices' %}" id="prices-link">Market Prices</a>
+            <a href="{% url 'schemes' %}" id="schemes-link">Schemes</a>
+            <a href="{% url 'weather' %}">Weather</a>
+            <a href="{% url 'chatbot' %}">Chat</a>
+        </div>
+
+        <div class="nav-auth">
+            {% if user.is_authenticated %}
+                
+                <div class="language-menu">
+                    <div class="lang-icon">🌐</div>
+                    <div class="dropdown-content">
+                        <a href="?lang=en">English</a>
+                        <a href="?lang=hi">हिंदी (Hindi)</a>
+                        <a href="?lang=ta">தமிழ் (Tamil)</a>
+                        <a href="?lang=te">తెలుగు (Telugu)</a>
+                        <a href="?lang=kn">ಕನ್ನಡ (Kannada)</a>
+                    </div>
+                </div>
+
+                <div class="profile-menu">
+                    <div class="profile-pic">
+                        {{ user.username|first|upper|default:'K' }}
+                    </div>
+                    <div class="dropdown-content">
+                        <div class="dropdown-header">
+                            <strong>{{ user.first_name|default:user.username }}</strong>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        <a href="{% url 'profile' %}">View Profile</a>
+                        <a href="{% url 'personalize' %}">My Farm</a>
+                        <a href="{% url 'history' %}">History</a>
+                        <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+                    </div>
+                </div>
+
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-auth-link">Login</a>
+                <a href="{% url 'signup' %}" class="btn-auth-link">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="messages-container" style="padding: 0 1rem; max-width: 1300px; margin: 5.5rem auto -0.5rem auto;">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}" style="padding: 1rem; border-radius: 8px; font-weight: bold; background-color: #e8f5e9; color: #2c5e2e; border: 1px solid #a7d3a6; list-style: none; margin-bottom: 1rem;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    <main class="content-wrapper">
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    
+    {% block scripts %}{% endblock %}
+
+    <script>
+        // Data for preloader fact generation
+        const facts = [
+            "India is the world's largest producer of milk, pulses, and jute.",
+            "The monsoon is often called the 'true finance minister of India'.",
+            "India's agriculture sector employs nearly half of the country's workforce.",
+            "The staple crop Rice covers the largest area under cultivation in India.",
+            "The Green Revolution in India started in the 1960s.",
+            "India has 15 different agro-climatic zones.",
+            "Black soil (Regur soil) is ideal for growing cotton and sugarcane."
+        ];
+        
+        const preloader = document.getElementById('preloader');
+        const factText = document.getElementById('preloader-fact');
+        const loaderText = document.getElementById('preloader-text');
+        
+        if (preloader) {
+            // 1. Show a fact immediately
+            if (factText) {
+                factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
+            }
+            
+            // 2. Change the fact every 3 seconds
+            let factInterval = setInterval(function() {
+                if (factText) {
+                    factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
+                }
+            }, 3000);
+
+            // --- LOADER ATTACHMENT ---
+            function attachLoader(linkId, text) {
+                const link = document.getElementById(linkId);
+                if (link) {
+                    link.addEventListener('click', function(e) {
+                        if (loaderText) {
+                            loaderText.innerText = text;
+                        }
+                        if (preloader) {
+                            preloader.style.opacity = '1';
+                            preloader.style.display = 'flex';
+                        }
+                    });
+                }
+            }
+            
+            attachLoader('schemes-link', 'Fetching latest schemes suitable for you...');
+            attachLoader('prices-link', 'Fetching live market prices...');
+            
+            // 4. When the page is fully loaded, fade out the preloader
+             function hidePreloader() {
+        clearInterval(factInterval); 
+        if (preloader) {
+            preloader.style.transition = 'opacity 0.5s ease';
+            preloader.style.opacity = '0'; 
+            setTimeout(() => { preloader.style.display = 'none'; }, 500); 
+        }
+    }
+
+    // Double-check: Hide if already loaded or wait for load event
+    if (document.readyState === 'complete') {
+        hidePreloader();
+    } else {
+        window.addEventListener('load', hidePreloader);
+        // Safety: Always hide after 5 seconds to avoid breaking the demo
+        setTimeout(hidePreloader, 5000); 
+    }
+        }
+        // --- AJAX LANGUAGE SWITCHER (Restored for functionality) ---
+        function attachLanguageSwitcher() {
+            const dropdownLinks = document.querySelectorAll('.language-menu .dropdown-content a');
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
+
+            dropdownLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const urlParams = new URLSearchParams(this.search);
+                    const langCode = urlParams.get('lang');
+
+                    if (langCode && csrfToken) {
+                        fetch('{% url "personalize" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: `location=N/A&main-crops=N/A&soil-type=N/A&language=${langCode}` 
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = window.location.pathname + '?lang=' + langCode;
+                            } else {
+                                console.error('Failed to save language preference.', response.status);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Network Error:', error);
+                        });
+                    } else if (langCode) {
+                         window.location.href = window.location.pathname + '?lang=' + langCode;
+                    }
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', attachLanguageSwitcher);
+    </script>

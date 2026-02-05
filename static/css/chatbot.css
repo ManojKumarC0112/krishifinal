@@ -1,0 +1,29 @@
+/* static/css/chatbot.css (FINAL COPY - Simplified) */
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to right, #e8f5e9, #c8e6c9);
+}
+
+.chatbot-container {
+  /* Increased size for better UI on desktop/hackathon presentation */
+  height: 80vh; 
+  max-width: 800px; 
+  margin: 20px auto;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 128, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popUp 1s ease-in-out;
+}
+
+@keyframes popUp {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Note: All chat box, message, and input styles are handled by chatbot.html inline styles */

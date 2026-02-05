@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Prediction Result{% endblock %}
+
+{% block styles %}
+<style>
+    /* --- Main Layout --- */
+    .result-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 1rem auto;
+    }
+
+    .image-column {
+        flex: 1;
+        min-width: 300px;
+    }
+    .image-column img {
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #ddd;
+    }
+
+    .details-column {
+        flex: 1.5;
+        min-width: 300px;
+    }
+
+    .result-card {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+        border: 1px solid #eee;
+    }
+
+    .result-card h2 {
+        color: #2c5e2e;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-card h3 {
+        color: #333;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 0.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.4rem;
+    }
+
+    /* --- Severity Badge --- */
+    .severity-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #fff;
+        margin-left: 10px;
+    }
+    .severity-low { background-color: #4CAF50; } /* Green */
+    .severity-medium { background-color: #ff9800; } /* Orange */
+    .severity-high { background-color: #f44336; } /* Red */
+    .severity-critical { background-color: #8b0000; } /* Dark Red */
+    .severity-unknown { background-color: #777; } /* Gray */
+
+    /* --- Language Selector --- */
+    .lang-selector {
+        max-width: 1200px;
+        margin: 0 auto 1.5rem auto;
+        padding: 1rem;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        text-align: center;
+        border: 1px solid #eee;
+    }
+    .lang-selector span {
+        font-weight: 600;
+        color: #333;
+        margin-right: 1rem;
+    }
+    .lang-btn {
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        background-color: #f0f0f0;
+        color: #555;
+        border-radius: 20px;
+        margin: 0 0.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .lang-btn:hover {
+        background-color: #e0e0e0;
+    }
+    .lang-btn.active {
+        background-color: #2c5e2e; /* Dark Green */
+        color: white;
+        font-weight: 600;
+    }
+    
+    /* --- ✅ NEW: Solution Card Styles --- */
+    .solution-steps-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .solution-step-card {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
+    .solution-step-card .step-number {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4CAF50;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .solution-step-card .step-content h4 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        color: #2c5e2e;
+    }
+    .solution-step-card .step-content p {
+        margin: 0;
+        color: #333;
+        line-height: 1.6;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="lang-selector">
+    <span>Translate to:</span>
+    <a href="{{ request.path }}?lang=en" 
+       class="lang-btn {% if current_lang == 'en' %}active{% endif %}">
+       English
+    </a>
+    <a href="{{ request.path }}?lang=hi" 
+       class="lang-btn {% if current_lang == 'hi' %}active{% endif %}">
+       हिंदी
+    </a>
+    <a href="{{ request.path }}?lang=ta" 
+       class="lang-btn {% if current_lang == 'ta' %}active{% endif %}">
+       தமிழ்
+    </a>
+    <a href="{{ request.path }}?lang=te" 
+       class="lang-btn {% if current_lang == 'te' %}active{% endif %}">
+       తెలుగు
+    </a>
+     <a href="{{ request.path }}?lang=kn" 
+       class="lang-btn {% if current_lang == 'kn' %}active{% endif %}">
+       ಕನ್ನಡ
+    </a>
+</div>
+
+<div class="result-container">
+    
+    <div class="image-column">
+        <h2>Uploaded Image</h2>
+        <img src="{{ prediction.image.url }}" alt="Uploaded crop image">
+    </div>
+
+    <div class="details-column">
+        <div class="result-card">
+            <h2>
+                {{ details.disease_name }}
+                
+                {% with severity_class=details.severity|default:"unknown"|lower %}
+                    <span class="severity-badge 
+                        {% if 'low' in severity_class %}severity-low
+                        {% elif 'medium' in severity_class %}severity-medium
+                        {% elif 'high' in severity_class %}severity-high
+                        {% elif 'critical' in severity_class %}severity-critical
+                        {% else %}severity-unknown
+                        {% endif %}">
+                        {{ details.severity|default:"Unknown" }}
+                    </span>
+                {% endwith %}
+            </h2>
+            <p style="font-size: 1.1rem; color: #555;">Crop Type: <strong>{{ prediction.crop_type }}</strong></p>
+        </div>
+
+        <div class="result-card">
+            <h3>🧪 Cause</h3>
+            <p>{{ details.cause|default:"No cause provided." }}</p>
+
+            <h3>🌿 Solution &amp; Cure</h3>
+            
+            <div class="solution-steps-container">
+                {% if details.solution and details.solution|length > 0 %}
+                    {% for item in details.solution %}
+                    <div class="solution-step-card">
+                        <div class="step-number">{{ forloop.counter }}</div>
+                        <div class="step-content">
+                            <h4>{{ item.step }}</h4>
+                            <p>{{ item.details }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No detailed solution steps were provided. Please try again.</p>
+                {% endif %}
+            </div>
+            </div>
+    </div>
+</div>
+
+{% endblock %}

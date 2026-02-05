@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Profile{% endblock %}
+
+{% block content %}
+<style>
+    /* CRITICAL FIX: Ensure the profile container has correct internal spacing */
+    .profile-container {
+        display: flex;
+        gap: 2rem;
+        max-width: 1100px;
+        margin: 2rem auto;
+        flex-wrap: wrap;
+    }
+    .profile-sidebar {
+        flex: 1;
+        min-width: 280px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        align-self: flex-start;
+        border: 1px solid #eee;
+    }
+    .profile-sidebar .big-initial {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #2c5e2e;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        margin: 0 auto 1rem auto;
+        border: 4px solid #a7d3a6;
+    }
+    .profile-main {
+        flex: 2.5;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem; /* Ensures vertical space between cards */
+    }
+    /* Styles for the standard cards */
+    .profile-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
+    }
+    .profile-card h3 {
+        margin-top: 0;
+        color: #2c5e2e;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem; /* Space below the divider */
+    }
+    .stat-item {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 0.8rem; /* Correct vertical spacing for list items */
+        line-height: 1.2;
+    }
+    .stat-item strong { color: #333; }
+    
+    /* Styles specific to the AI Report Card */
+    .report-card {
+        background: linear-gradient(135deg, #f1f8e9, #e8f5e9);
+        border: 2px solid #a7d3a6;
+        padding: 2rem;
+    }
+    .report-card h3 {
+        border-bottom: none; /* Remove duplicate divider */
+    }
+    .report-content p {
+        margin-top: 5px;
+        margin-bottom: 15px; /* Spacing below paragraphs */
+        font-size: 1rem;
+        color: #333;
+    }
+</style>
+
+<div class="profile-container">
+    {% csrf_token %}
+
+    <aside class="profile-sidebar">
+        <div class="big-initial">
+            {{ user.username|first|upper|default:'K' }}
+        </div>
+        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+        <p>@{{ user.username }}</p>
+        <p style="font-size: 0.9rem; margin-top: 15px;">
+            Member since: {{ join_date|date:"F Y" }}
+        </p>
+        
+        <a href="{% url 'personalize' %}" class="btn-submit" style="text-decoration: none; margin-top: 1.5rem; background: #ffc107; color: #333;">
+            Edit My Farm
+        </a>
+    </aside>
+
+    <main class="profile-main">
+    
+        <div class="profile-card">
+            <h3>Your Dashboard</h3>
+            <div class="stat-item">
+                <strong>Email:</strong> {{ user.email }}
+            </div>
+            <div class="stat-item">
+                <strong>Total Predictions Made:</strong> {{ predictions_count }}
+            </div>
+            <div class="stat-item">
+                <strong>Account Status:</strong> Active
+            </div>
+        </div>
+        
+        <div class="profile-card report-card">
+            <h3>Personalized AI Report</h3>
+            
+            <div id="report-prompt">
+                <p>Use your 'My Farm' data to generate a personalized AI report on crop selection, market demand, and pest alerts.</p>
+                <button class="btn-submit" id="generate-report-btn">
+                    Generate My Report
+                </button>
+            </div>
+            
+            <div class="report-loader-inline" id="report-loader">
+                <div class="loader-spinner"></div>
+                <p>Analyzing your farm data...</p>
+            </div>
+            
+            <div id="report-content" style="display: none;">
+                <div class="report-content">
+                    <h4>💡 Market Opportunity</h4>
+                    <p id="report-market"></p>
+                    
+                    <h4 style="margin-top: 1rem;">⚠️ Pest & Disease Alert</h4>
+                    <p id="report-pest"></p>
+                    
+                    <h4 style="margin-top: 1rem;">🌱 Soil Health</h4>
+                    <p id="report-soil"></p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    document.getElementById('generate-report-btn').addEventListener('click', function() {
+        
+        const promptDiv = document.getElementById('report-prompt');
+        const loaderDiv = document.getElementById('report-loader');
+        const contentDiv = document.getElementById('report-content');
+        
+        const marketField = document.getElementById('report-market');
+        const pestField = document.getElementById('report-pest');
+        const soilField = document.getElementById('report-soil');
+        
+        promptDiv.style.display = 'none';
+        loaderDiv.style.display = 'flex';
+        contentDiv.style.display = 'none'; // Hide old report
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // 4. Make the API call
+        fetch('{% url "api_generate_report" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.error || response.statusText);
+                }).catch(() => {
+                    throw new Error(response.statusText);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            loaderDiv.style.display = 'none';
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            marketField.textContent = data.market_opportunity;
+            pestField.textContent = data.pest_alert;
+            soilField.textContent = data.soil_health;
+            
+            contentDiv.style.display = 'block';
+            promptDiv.style.display = 'block';
+
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            loaderDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+            
+            marketField.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+            pestField.innerHTML = `<span style="color: red;">Could not load data.</span>`;
+            soilField.innerHTML = `<span style="color: red;">Please try again later.</span>`;
+            
+            promptDiv.style.display = 'block';
+        });
+    });
+</script>
+{% endblock %}
