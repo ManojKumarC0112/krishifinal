@@ -110,7 +110,7 @@
             </a>
             <a href="{% url 'crop_prices' %}" id="prices-link">Market Prices</a>
             <a href="{% url 'schemes' %}" id="schemes-link">Schemes</a>
-            <a href="{% url 'weather' %}">Weather</a>
+            <a href="{% url 'weather' %}"id="weather-link">Weather</a>
             <a href="{% url 'chatbot' %}">Chat</a>
         </div>
 
@@ -216,6 +216,7 @@
             }
             
             attachLoader('schemes-link', 'Fetching latest schemes suitable for you...');
+            attachLoader('weather-link', 'Fetching local weather forecast...');
             attachLoader('prices-link', 'Fetching live market prices...');
             
             // 4. When the page is fully loaded, fade out the preloader

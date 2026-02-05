@@ -19,7 +19,7 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         position: fixed;
         width: 100%;
-        z-index: 100;
+         
     }
     .navbar .logo {
         font-size: 1.6rem;
@@ -63,15 +63,26 @@
         background-color: #a7d3a6;
         color: #2c5e2e;
     }
+    @media (max-width: 768px) {
+    .hero-text {
+        padding: 1.5rem;
+        margin: 0 1rem; /* Prevent touching edges */
+    }
+    .hero-text h1 {
+        font-size: 2rem; /* Smaller font */
+    }
+    .hero-text p {
+        font-size: 1rem;
+    }
+    .about {
+        padding: 2rem 1rem;
+    }
+}
   </style>
 </head>
 <body>
 
-  <div id="preloader">
-      <div id="preloader-spinner"></div>
-      <p id="preloader-text">Loading... Please wait.</p>
-      <p id="preloader-fact"></p>
-  </div>
+   
   <nav class="navbar">
       <a class="logo" href="{% url 'index' %}">
     <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 50px; vertical-align: middle; margin-right: 10px;">
@@ -159,7 +170,7 @@
           "Black soil (Regur soil) is ideal for growing cotton and sugarcane."
       ];
       
-      const preloader = document.getElementById('preloader');
+       
       const factText = document.getElementById('preloader-fact');
       const loaderText = document.getElementById('preloader-text');
 

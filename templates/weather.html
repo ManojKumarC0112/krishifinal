@@ -274,21 +274,23 @@
                 {% endfor %}
             </ul>
         </div>
-        <div class="current-condition-card">
+       <div class="current-condition-card">
             <h2>Current Weather in {{ data.city }}</h2>
-            <p class="current-temp">{{ data.temperature|default:"N/A" }}°C</p>
+            
+            <p class="current-temp">{{ data.temperature|default:"N/A" }}</p>
+            
             <p class="current-condition">{{ data.condition|default:"N/A" }}</p>
 
             <div class="stat-grid">
                 <div class="stat-card">
                     <div class="stat-card-icon">💧</div>
                     <h4>Humidity</h4>
-                    <p>{{ data.humidity|default:"N/A" }}%</p>
+                    <p>{{ data.humidity|default:"N/A" }}</p>
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-icon">💨</div>
                     <h4>Wind</h4>
-                    <p>{{ data.wind|default:"N/A" }} km/h</p>
+                    <p>{{ data.wind|default:"N/A" }}</p>
                 </div>
             </div>
         </div>

@@ -647,12 +647,11 @@ Respond in {language_name}.
         reply = extract_text_from_genai_response(response)
 
         # Save Chat history (if model exists)
-        try:
-            from .models import ChatMessage
-            ChatMessage.objects.create(user=request.user, role='user', message=user_question)
-            ChatMessage.objects.create(user=request.user, role='bot', message=reply)
-        except Exception:
-            pass
+      ##    from .models import ChatMessage
+      #      ChatMessage.objects.create(user=request.user, role='user', message=user_question)
+       #     ChatMessage.objects.create(user=request.user, role='bot', message=reply)
+        #except Exception:
+        #    pass/*
 
         return JsonResponse({"reply": reply})
     except Exception as e:
@@ -753,7 +752,11 @@ def fetch_agmarknet_price(crop_name):
         # NOTE: site structure may change. We attempt a simple GET and broad parse.
         search_url = "https://agmarknet.gov.in/SearchCmmMkt.aspx"
         params = {"Tx_Commodity": crop_name, "Tx_State": "", "Tx_District": "", "Tx_Market": ""}
-        r = requests.get(search_url, params=params, timeout=10)
+        try:
+             r = requests.get(search_url, params=params, timeout=10)
+        except requests.exceptions.Timeout:
+            print("⚠️ Agmarknet timed out - skipping.")
+            return None
         if not r.ok:
             return None
         soup = BeautifulSoup(r.text, "html.parser")

@@ -1,6 +1,8 @@
 # main/urls.py
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # --- Auth Views ---
@@ -41,3 +43,5 @@ urlpatterns = [
     path("api/generate-report/", views.api_generate_report, name="api_generate_report"),
     path("api/process-video/<int:video_id>/", views.api_process_video, name="api_process_video"),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
