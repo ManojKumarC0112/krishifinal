@@ -19,7 +19,9 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         position: fixed;
         width: 100%;
-         
+        top: 0;
+        z-index: 1000;
+        box-sizing: border-box;
     }
     .navbar .logo {
         font-size: 1.6rem;
@@ -63,13 +65,72 @@
         background-color: #a7d3a6;
         color: #2c5e2e;
     }
+
+    /* --- ✅ MENU FIXES START --- */
+    .profile-menu, .language-menu {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle; 
+        cursor: pointer;
+        color: white;
+        padding: 10px 0; /* Larger hit area */
+    }
+    /* Invisible bridge to keep menu open */
+    .profile-menu::after, .language-menu::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 20px; 
+        background: transparent;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1001;
+        right: 0;
+        top: 100%;
+        margin-top: 0px; 
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .dropdown-content a {
+        color: black !important;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        margin-left: 0 !important;
+    }
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+    .profile-menu:hover .dropdown-content,
+    .language-menu:hover .dropdown-content {
+        display: block;
+    }
+    /* Hide Google Toolbar */
+    .goog-te-banner-frame.skiptranslate {
+        display: none !important;
+    } 
+    body {
+        top: 0px !important; 
+    }
+    #google_translate_element {
+        display: none; 
+    }
+    /* --- ✅ MENU FIXES END --- */
+
     @media (max-width: 768px) {
     .hero-text {
         padding: 1.5rem;
-        margin: 0 1rem; /* Prevent touching edges */
+        margin: 0 1rem; 
     }
     .hero-text h1 {
-        font-size: 2rem; /* Smaller font */
+        font-size: 2rem; 
     }
     .hero-text p {
         font-size: 1rem;
@@ -82,7 +143,8 @@
 </head>
 <body>
 
-   
+   <div id="google_translate_element"></div>
+
   <nav class="navbar">
       <a class="logo" href="{% url 'index' %}">
     <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 50px; vertical-align: middle; margin-right: 10px;">
@@ -102,13 +164,13 @@
           {% if user.is_authenticated %}
               
               <div class="language-menu">
-                  <div class="lang-icon">🌐</div>
+                  <div class="lang-icon" style="font-size: 1.5rem;">🌐</div>
                   <div class="dropdown-content">
-                      <a href="?lang=en">English</a>
-                      <a href="?lang=hi">हिंदी (Hindi)</a>
-                      <a href="?lang=ta">தமிழ் (Tamil)</a>
-                      <a href="?lang=te">తెలుగు (Telugu)</a>
-                      <a href="?lang=kn">ಕನ್ನಡ (Kannada)</a>
+                      <a href="#" onclick="switchLanguage('en'); return false;">English</a>
+                      <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
+                      <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
+                      <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
+                      <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
                   </div>
               </div>
               
@@ -159,7 +221,52 @@
   <a href="{% url 'chatbot' %}" class="chat-widget-button" title="Chat with Sakhi">
       💬
   </a>
+
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,ta,te,kn',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <script>
+      // ✅ Aggressive Language Switcher Logic
+      function switchLanguage(langCode) {
+          var cookieVal = "/en/" + langCode;
+          document.cookie = "googtrans=" + cookieVal + "; path=/";
+          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + window.location.hostname;
+          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.127.0.0.1";
+          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.localhost";
+          
+          const csrfToken = '{{ csrf_token }}'; 
+          // If csrf_token tag not in body, fallback might be needed but usually Django injects it in session
+          // For safety in index.html, we just assume it might work or we reload.
+          
+          fetch('{% url "personalize" %}', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'X-CSRFToken': '{{ csrf_token }}' // Ensure this renders or is available
+              },
+              body: `language=${langCode}`
+          })
+          .then(() => {
+              var newUrl = new URL(window.location.href);
+              newUrl.searchParams.set('lang', langCode);
+              window.location.href = newUrl.toString();
+          })
+          .catch(() => {
+              var newUrl = new URL(window.location.href);
+              newUrl.searchParams.set('lang', langCode);
+              window.location.href = newUrl.toString();
+          });
+      }
+
       const facts = [
           "India is the world's largest producer of milk, pulses, and jute.",
           "The monsoon is often called the 'true finance minister of India'.",
@@ -174,36 +281,32 @@
       const factText = document.getElementById('preloader-fact');
       const loaderText = document.getElementById('preloader-text');
 
-      // 1. Show a fact immediately
-      factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-      
-      // 2. Change the fact every 3 seconds
-      let factInterval = setInterval(function() {
+      if (factText) {
           factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-      }, 3000);
+          let factInterval = setInterval(function() {
+              factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
+          }, 3000);
+      }
 
-      // --- NEW: On-click loader for slow pages ---
       const schemesLink = document.getElementById('schemes-link');
       if (schemesLink) {
           schemesLink.addEventListener('click', function(e) {
-              // Set the custom text you wanted
-              loaderText.innerText = 'Fetching latest schemes suitable for you...';
-              
-              // Force the preloader to show *now*
-              preloader.style.opacity = '1';
-              preloader.style.display = 'flex';
+              if (loaderText) loaderText.innerText = 'Fetching latest schemes suitable for you...';
+              const preloader = document.getElementById('preloader'); // Define here locally if needed
+              if (preloader) {
+                  preloader.style.opacity = '1';
+                  preloader.style.display = 'flex';
+              }
           });
       }
 
-      // 4. When the page is fully loaded, fade out the preloader
       window.onload = () => {
-          clearInterval(factInterval); // Stop changing facts
-          preloader.style.opacity = '0'; // Start fade out
-          
-          // Wait for animation to finish, then hide it
-          setTimeout(() => {
-              preloader.style.display = 'none';
-          }, 500); // 500ms = 0.5s (matches CSS transition)
+          const preloader = document.getElementById('preloader'); // Define locally
+          // clearInterval(factInterval); // Not accessible here if var let defined inside
+          if (preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => { preloader.style.display = 'none'; }, 500);
+          }
       };
   </script>
   </body>

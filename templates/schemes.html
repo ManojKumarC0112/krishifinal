@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="{% static 'css/global_styles.css' %}">
   
   <style>
-    /* Copied from base.html to make navbar work */
+    /* Navbar Styles */
     .navbar {
         display: flex;
         justify-content: space-between;
@@ -21,6 +21,7 @@
         width: 100%;
         top: 0;
         z-index: 1000;
+        box-sizing: border-box; /* Added */
     }
     .navbar .logo {
         font-size: 1.6rem;
@@ -49,7 +50,7 @@
     .navbar .nav-auth {
         display: flex;
         align-items: center;
-        gap: 1rem; /* NEW */
+        gap: 1rem;
     }
     .navbar .nav-auth a.btn-auth-link {
         color: white;
@@ -64,31 +65,84 @@
         background-color: #a7d3a6;
         color: #2c5e2e;
     }
+
+    /* --- ✅ MENU FIXES --- */
+    .profile-menu, .language-menu {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle; 
+        cursor: pointer;
+        color: white;
+        padding: 10px 0;
+    }
+    .profile-menu::after, .language-menu::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 20px; 
+        background: transparent;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1001;
+        right: 0;
+        top: 100%;
+        margin-top: 0px; 
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .dropdown-content a {
+        color: black !important;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        margin-left: 0 !important;
+    }
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+    .profile-menu:hover .dropdown-content,
+    .language-menu:hover .dropdown-content {
+        display: block;
+    }
+    .goog-te-banner-frame.skiptranslate {
+        display: none !important;
+    } 
+    body {
+        top: 0px !important; 
+    }
+    #google_translate_element {
+        display: none; 
+    }
+    /* --- ✅ END MENU FIXES --- */
   
-    /* --- NEW: Schemes Page Styles --- */
+    /* Schemes Styles */
     .scheme-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Larger cards */
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 1.5rem;
       padding: 1rem;
     }
     .scheme-card {
-      display: block; /* Overrides from global_styles */
-      text-decoration: none; /* Overrides from global_styles */
-      color: #333; /* Overrides from global_styles */
-      
+      display: block;
+      text-decoration: none;
+      color: #333;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       transition: all 0.3s ease;
-      overflow: hidden; /* To contain header */
+      overflow: hidden;
     }
     .scheme-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.1);
     }
-    
-    /* Card Header with Icon and Category */
     .scheme-card-header {
       display: flex;
       align-items: center;
@@ -112,8 +166,6 @@
       color: #2c5e2e;
       background-color: #dcedc8;
     }
-    
-    /* Card Content */
     .scheme-card-content {
       padding: 1.5rem;
     }
@@ -143,6 +195,8 @@
 </head>
 <body>
 
+  <div id="google_translate_element"></div>
+
   <div id="preloader">
       <div id="preloader-spinner"></div>
       <p id="preloader-text">Loading... Please wait.</p>
@@ -169,13 +223,13 @@
           {% if user.is_authenticated %}
               
               <div class="language-menu">
-                  <div class="lang-icon">🌐</div>
+                  <div class="lang-icon" style="font-size: 1.5rem;">🌐</div>
                   <div class="dropdown-content">
-                      <a href="?lang=en">English</a>
-                      <a href="?lang=hi">हिंदी (Hindi)</a>
-                      <a href="?lang=ta">தமிழ் (Tamil)</a>
-                      <a href="?lang=te">తెలుగు (Telugu)</a>
-                      <a href="?lang=kn">ಕನ್ನಡ (Kannada)</a>
+                      <a href="#" onclick="switchLanguage('en'); return false;">English</a>
+                      <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
+                      <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
+                      <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
+                      <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
                   </div>
               </div>
               
@@ -217,27 +271,18 @@
           <a class="scheme-card" href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer">
               
               <div class="scheme-card-header">
-                  
                   {% if 'KISAN' in scheme.name or 'Finance' in scheme.name %}
                       <div class="scheme-card-icon">💰</div>
-                      <div class="scheme-card-header-text">
-                          <span class="scheme-tag">Financial Aid</span>
-                      </div>
+                      <div class="scheme-card-header-text"><span class="scheme-tag">Financial Aid</span></div>
                   {% elif 'PMFBY' in scheme.name or 'Insurance' in scheme.name %}
                       <div class="scheme-card-icon">☂️</div>
-                      <div class="scheme-card-header-text">
-                          <span class="scheme-tag">Crop Insurance</span>
-                      </div>
+                      <div class="scheme-card-header-text"><span class="scheme-tag">Crop Insurance</span></div>
                   {% elif 'eNAM' in scheme.name or 'Market' in scheme.name %}
                       <div class="scheme-card-icon">📈</div>
-                      <div class="scheme-card-header-text">
-                          <span class="scheme-tag">Market Linkage</span>
-                      </div>
+                      <div class="scheme-card-header-text"><span class="scheme-tag">Market Linkage</span></div>
                   {% else %}
                       <div class="scheme-card-icon">📄</div>
-                      <div class="scheme-card-header-text">
-                          <span class="scheme-tag">General Scheme</span>
-                      </div>
+                      <div class="scheme-card-header-text"><span class="scheme-tag">General Scheme</span></div>
                   {% endif %}
               </div>
               
@@ -267,7 +312,47 @@
       💬
   </a>
 
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,ta,te,kn',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <script>
+      // ✅ Aggressive Language Switcher Logic
+      function switchLanguage(langCode) {
+          var cookieVal = "/en/" + langCode;
+          document.cookie = "googtrans=" + cookieVal + "; path=/";
+          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + window.location.hostname;
+          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.127.0.0.1";
+          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.localhost";
+          
+          fetch('{% url "personalize" %}', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'X-CSRFToken': '{{ csrf_token }}'
+              },
+              body: `language=${langCode}`
+          })
+          .then(() => {
+              var newUrl = new URL(window.location.href);
+              newUrl.searchParams.set('lang', langCode);
+              window.location.href = newUrl.toString();
+          })
+          .catch(() => {
+              var newUrl = new URL(window.location.href);
+              newUrl.searchParams.set('lang', langCode);
+              window.location.href = newUrl.toString();
+          });
+      }
+
       const facts = [
           "India is the world's largest producer of milk, pulses, and jute.",
           "The monsoon is often called the 'true finance minister of India'.",
@@ -282,19 +367,15 @@
       const factText = document.getElementById('preloader-fact');
       const loaderText = document.getElementById('preloader-text');
 
-      // 1. Show a fact immediately
       if (factText) {
           factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
+          let factInterval = setInterval(function() {
+              if (factText) {
+                  factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
+              }
+          }, 3000);
       }
-      
-      // 2. Change the fact every 3 seconds
-      let factInterval = setInterval(function() {
-          if (factText) {
-              factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-          }
-      }, 3000);
 
-      // --- NEW: On-click loader for slow pages ---
       function attachLoader(linkId, text) {
           const link = document.getElementById(linkId);
           if (link) {
@@ -310,19 +391,15 @@
           }
       }
       
-      // Attach loaders to both links
       attachLoader('schemes-link', 'Fetching latest schemes suitable for you...');
       attachLoader('prices-link', 'Fetching live market prices...');
 
-      // 4. When the page is fully loaded, fade out the preloader
       window.onload = () => {
-          clearInterval(factInterval); // Stop changing facts
           if (preloader) {
-              preloader.style.opacity = '0'; // Start fade out
-              
+              preloader.style.opacity = '0'; 
               setTimeout(() => {
                   preloader.style.display = 'none';
-              }, 500); // 500ms = 0.5s (matches CSS transition)
+              }, 500); 
           }
       };
   </script>

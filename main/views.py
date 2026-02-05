@@ -6,7 +6,8 @@ import base64
 import datetime
 import time # Ensure time is imported
 from functools import wraps
-
+import numpy as np
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
@@ -155,17 +156,63 @@ def extract_text_from_genai_response(obj):
 # AUTH / PAGES (Unchanged)
 # -------------------------
 def index_view(request):
-    greeting = "Welcome"
-    if request.user.is_authenticated:
-        hour = datetime.datetime.now().hour  # FIXED LINE
-        if hour < 12:
-            greeting = "Good morning"
-        elif hour < 17:
-            greeting = "Good afternoon"
-        else:
-            greeting = "Good evening"
-    return render(request, "index.html", {"timeGreeting": greeting})
+    # 1. Get current language from URL (strongest) or Session
+    lang = request.GET.get('lang', 'en')
+    
+    # 2. Define Translations for the specific greeting
+    translations = {
+        'hi': {
+            'morning': 'सुप्रभात',
+            'afternoon': 'शुभ दोपहर',
+            'evening': 'शुभ संध्या',
+            'welcome': 'स्वागत है'
+        },
+        'ta': {
+            'morning': 'காலை வணக்கம்',
+            'afternoon': 'மதிய வணக்கம்',
+            'evening': 'மாலை வணக்கம்',
+            'welcome': 'நல்வரவு'
+        },
+        'te': {
+            'morning': 'శుభోదయం',
+            'afternoon': 'శుభ మధ్యాహ్నం',
+            'evening': 'శుభ సాయంత్రం',
+            'welcome': 'స్వాగతం'
+        },
+        'kn': {
+            'morning': 'ಶುಭೋದಯ',
+            'afternoon': 'ಶುಭ ಮಧ್ಯಾಹ್ನ',
+            'evening': 'ಶುಭ ಸಂಜೆ',
+            'welcome': 'ಸ್ವಾಗತ'
+        }
+    }
 
+    greeting = "Welcome"
+    
+    if request.user.is_authenticated:
+        hour = datetime.datetime.now().hour
+        
+        # Determine time of day key
+        time_key = 'morning'
+        if hour >= 12 and hour < 17:
+            time_key = 'afternoon'
+        elif hour >= 17:
+            time_key = 'evening'
+            
+        # Select translation
+        if lang in translations:
+            greeting = translations[lang].get(time_key, "Welcome")
+        else:
+            # Default English
+            if time_key == 'morning': greeting = "Good morning"
+            elif time_key == 'afternoon': greeting = "Good afternoon"
+            else: greeting = "Good evening"
+    else:
+        # Not authenticated
+        if lang in translations:
+            greeting = translations[lang].get('welcome', "Welcome")
+
+    return render(request, "index.html", {"timeGreeting": greeting})
 
 def signup_view(request):
     """
@@ -1730,3 +1777,5 @@ def video_result_detail_view(request, video_id):
 @require_POST
 def api_process_video(request, video_id):
     return JsonResponse({"status": "COMPLETED"})
+
+

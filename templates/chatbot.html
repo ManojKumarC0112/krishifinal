@@ -17,10 +17,11 @@
     }
     body {
       background: linear-gradient(to right, #e8f5e9, #c8e6c9);
-      padding-top: 80px; /* Space for fixed navbar */
+      padding-top: 80px; 
+      top: 0 !important; /* Fix for google banner */
     }
 
-    /* --- Navbar (RESTORED STYLES for consistency) --- */
+    /* --- Navbar --- */
     .navbar {
         display: flex;
         justify-content: space-between;
@@ -31,9 +32,9 @@
         position: fixed;
         width: 100%;
         top: 0;
-        left: 0; /* Added */
+        left: 0;
         z-index: 1000;
-        box-sizing: border-box; /* Added */
+        box-sizing: border-box;
     }
     .navbar .logo {
         font-size: 1.6rem;
@@ -78,7 +79,60 @@
         color: #2c5e2e;
     }
 
-    /* --- Chatbot Container --- */
+    /* --- ✅ MENU FIXES --- */
+    .profile-menu, .language-menu {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle; 
+        cursor: pointer;
+        color: white;
+        padding: 10px 0;
+    }
+    .profile-menu::after, .language-menu::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 20px; 
+        background: transparent;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1001;
+        right: 0;
+        top: 100%;
+        margin-top: 0px; 
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .dropdown-content a {
+        color: black !important;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        margin-left: 0 !important;
+    }
+    .dropdown-content a:hover {
+        background-color: #f1f1f1;
+    }
+    .profile-menu:hover .dropdown-content,
+    .language-menu:hover .dropdown-content {
+        display: block;
+    }
+    .goog-te-banner-frame.skiptranslate {
+        display: none !important;
+    } 
+    #google_translate_element {
+        display: none; 
+    }
+    /* --- ✅ END MENU FIXES --- */
+
+    /* Chatbot Styles (Unchanged) */
     .chatbot-container {
       height: 80vh; 
       max-width: 800px; 
@@ -90,8 +144,6 @@
       flex-direction: column;
       overflow: hidden;
     }
-
-    /* CRITICAL FIX: Ensure header elements are correctly centered and aligned */
     .chat-header {
       background-color: #4caf50;
       color: white;
@@ -110,11 +162,9 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      /* Ensures controls group neatly */
     }
     .header-controls label {
         font-size: 0.9rem;
-        /* Align label text */
         line-height: 1.5; 
     }
     .header-controls select {
@@ -122,7 +172,6 @@
       border-radius: 5px;
       border: none;
       font-size: 0.9rem;
-      /* Align select input */
       height: 30px; 
     }
     .header-controls button {
@@ -135,7 +184,6 @@
       font-size: 1.2rem;
       line-height: 1;
     }
-
     .chat-box {
       flex: 1;
       padding: 20px;
@@ -145,8 +193,6 @@
       flex-direction: column;
       gap: 15px;
     }
-
-    /* --- Chat Bubbles (Self-Contained) --- */
     .user-message {
       background-color: #dcedc8;
       padding: 10px 15px;
@@ -186,7 +232,7 @@
     }
     .message-content {
       flex: 1;
-      padding-top: 5px; /* Align text with avatar */
+      padding-top: 5px; 
     }
     .timestamp {
       font-size: 0.75rem;
@@ -194,8 +240,6 @@
       margin-top: 5px;
       display: block;
     }
-    
-    /* Typing Indicator (from global_styles.css) */
     .typing-indicator {
         display: flex;
         align-items: center;
@@ -216,10 +260,6 @@
         0%, 80%, 100% { transform: scale(0); }
         40% { transform: scale(1); }
     }
-    /* --- End Chat Bubbles --- */
-
-
-    /* --- Input Area --- */
     .chat-input-container {
       padding: 15px;
       background-color: #fff;
@@ -282,6 +322,8 @@
 <body>
   {% csrf_token %}
 
+  <div id="google_translate_element"></div>
+
   <nav class="navbar">
      <a class="logo" href="{% url 'index' %}">
     <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 50px; vertical-align: middle; margin-right: 10px;">
@@ -301,13 +343,13 @@
           {% if user.is_authenticated %}
               
               <div class="language-menu">
-                  <div class="lang-icon">🌐</div>
+                  <div class="lang-icon" style="font-size: 1.5rem;">🌐</div>
                   <div class="dropdown-content">
-                      <a href="?lang=en">English</a>
-                      <a href="?lang=hi">हिंदी (Hindi)</a>
-                      <a href="?lang=ta">தமிழ் (Tamil)</a>
-                      <a href="?lang=te">తెలుగు (Telugu)</a>
-                      <a href="?lang=kn">ಕನ್ನಡ (Kannada)</a>
+                      <a href="#" onclick="switchLanguage('en'); return false;">English</a>
+                      <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
+                      <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
+                      <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
+                      <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
                   </div>
               </div>
 
@@ -333,6 +375,7 @@
           {% endif %}
       </div>
   </nav>
+
   <div class="chatbot-container">
     <div class="chat-header">
       <span>🌾 Sakhi - Your Smart Krishi Assistant</span>
@@ -378,8 +421,51 @@
       💬
   </a>
 
-   <script>
-    // --- 1. Setup Elements ---
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,ta,te,kn',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <script>
+    // ✅ Aggressive Language Switcher Logic
+    function switchLanguage(langCode) {
+        var cookieVal = "/en/" + langCode;
+        document.cookie = "googtrans=" + cookieVal + "; path=/";
+        document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + window.location.hostname;
+        document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.127.0.0.1";
+        document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.localhost";
+        
+        // Chatbot page uses 'name=csrfmiddlewaretoken' input, so we use that value
+        const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('{% url "personalize" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrf
+            },
+            body: `language=${langCode}`
+        })
+        .then(() => {
+            var newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('lang', langCode);
+            window.location.href = newUrl.toString();
+        })
+        .catch(() => {
+            var newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('lang', langCode);
+            window.location.href = newUrl.toString();
+        });
+    }
+
+    // --- EXISTING CHATBOT LOGIC BELOW ---
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const chatBox = document.getElementById('chat-box');
     const userInput = document.getElementById('user-input');
@@ -388,69 +474,36 @@
     const stopSpeechBtn = document.getElementById('stop-speech-btn');
     const micStatus = document.getElementById('mic-status');
     
-    // ✅ State Flags
     let isVoiceInput = false; 
     let isSakhiSpeaking = false; 
     let isRecognitionRunning = false; 
 
-    // --- 2. Text-to-Speech (TTS) Setup ---
+    // TTS Setup
     const synth = window.speechSynthesis;
     let voices = [];
-
     const voicesLoadedPromise = new Promise((resolve) => {
         const populateAndResolve = () => {
             voices = synth.getVoices();
-            if (voices.length > 0) {
-                resolve();
-                return true;
-            }
+            if (voices.length > 0) { resolve(); return true; }
             return false;
         };
-        if (!populateAndResolve()) {
-            synth.onvoiceschanged = populateAndResolve;
-        }
-        setTimeout(() => {
-            if (voices.length === 0) populateAndResolve();
-            resolve();
-        }, 2000); 
+        if (!populateAndResolve()) synth.onvoiceschanged = populateAndResolve;
+        setTimeout(() => { if (voices.length === 0) populateAndResolve(); resolve(); }, 2000); 
     });
 
     async function speakText(text, lang) {
       await voicesLoadedPromise;
       synth.cancel();
-      
       isSakhiSpeaking = true;
-      if (isRecognitionRunning && recognition) {
-          recognition.stop(); 
-      }
-
+      if (isRecognitionRunning && recognition) recognition.stop(); 
       const utterance = new SpeechSynthesisUtterance(text);
       const langShort = lang.split('-')[0];
-      
-      let foundVoice = voices.find(voice => 
-          voice.lang.startsWith(langShort) && 
-          (voice.name.toLowerCase().includes('female') || 
-           voice.name.toLowerCase().includes('google'))
-      );
-      
-      if (!foundVoice) {
-          foundVoice = voices.find(voice => voice.lang.startsWith(langShort));
-      }
-      
-      if (foundVoice) {
-          utterance.voice = foundVoice;
-      }
-      
+      let foundVoice = voices.find(voice => voice.lang.startsWith(langShort) && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('google')));
+      if (!foundVoice) foundVoice = voices.find(voice => voice.lang.startsWith(langShort));
+      if (foundVoice) utterance.voice = foundVoice;
       utterance.rate = 1.0; 
-      
-      utterance.onend = () => {
-          isSakhiSpeaking = false;
-      };
-      utterance.onerror = () => {
-          isSakhiSpeaking = false;
-          console.error('TTS error');
-      };
-      
+      utterance.onend = () => { isSakhiSpeaking = false; };
+      utterance.onerror = () => { isSakhiSpeaking = false; console.error('TTS error'); };
       synth.speak(utterance);
     }
     
@@ -460,203 +513,87 @@
       micStatus.textContent = "Speech stopped.";
     });
 
-    // --- 3. Speech-to-Text (STT) Setup ---
+    // STT Setup
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
-    
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      
       micBtn.addEventListener('click', () => {
-        if (isRecognitionRunning) {
-             recognition.stop(); 
-             return;
-        }
-        if (isSakhiSpeaking) {
-            micStatus.textContent = "Please wait, Sakhi is speaking.";
-            return;
-        }
-        
+        if (isRecognitionRunning) { recognition.stop(); return; }
+        if (isSakhiSpeaking) { micStatus.textContent = "Please wait, Sakhi is speaking."; return; }
         micStatus.textContent = "Listening... Speak clearly.";
         recognition.lang = langSelect.value;
-        try {
-          recognition.start();
-          micBtn.classList.add('mic-recording');
-          isRecognitionRunning = true; 
-        } catch(e) { 
-            console.error("Speech recognition start error:", e); 
-        }
+        try { recognition.start(); micBtn.classList.add('mic-recording'); isRecognitionRunning = true; } catch(e) { console.error("Speech recognition start error:", e); }
       });
-      
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         userInput.value = transcript;
         micStatus.textContent = "Sending message...";
-        
         isVoiceInput = true;
-        
         setTimeout(sendMessage, 500); 
       };
-      
-      recognition.onend = () => {
-        micBtn.classList.remove('mic-recording');
-        isRecognitionRunning = false; 
-      };
-      
-      recognition.onerror = (event) => {
-        micBtn.classList.remove('mic-recording');
-        isRecognitionRunning = false; 
-        if (event.error !== 'no-speech' && event.error !== 'aborted') {
-            micStatus.textContent = "Error: " + event.error;
-        } else {
-            micStatus.textContent = "No speech detected. Try again.";
-        }
-      };
-      
+      recognition.onend = () => { micBtn.classList.remove('mic-recording'); isRecognitionRunning = false; };
+      recognition.onerror = (event) => { micBtn.classList.remove('mic-recording'); isRecognitionRunning = false; if (event.error !== 'no-speech' && event.error !== 'aborted') { micStatus.textContent = "Error: " + event.error; } else { micStatus.textContent = "No speech detected. Try again."; } };
     } else {
       micBtn.disabled = true;
       micBtn.innerHTML = "🚫";
       micStatus.textContent = "Voice input not supported in this browser.";
     }
 
-    // --- 4. Helper Functions (Unchanged) ---
     function markdownToHTML(text) {
       let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       html = html.replace(/^\*\s(.*)$/gm, '<p style="margin: 0; padding: 2px 0;">• $1</p>');
       html = html.split('\n').map(line => line.trim().startsWith('<p') ? line : (line.trim() ? `<p>${line}</p>` : '')).join('');
       return html;
     }
-
     function getCurrentTime() {
       const now = new Date();
       return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
+    function handleManualSend() { isVoiceInput = false; sendMessage(); }
+    function handleKey(e) { if (e.key === 'Enter') { isVoiceInput = false; sendMessage(); } }
 
-    // --- 5. Input Handlers (Unchanged) ---
-    function handleManualSend() {
-        isVoiceInput = false;
-        sendMessage();
-    }
-    function handleKey(e) {
-      if (e.key === 'Enter') {
-        isVoiceInput = false;
-        sendMessage();
-      }
-    }
-
-    // --- 6. Main Send Message Logic ---
     async function sendMessage() {
-      if (isRecognitionRunning && recognition) {
-        recognition.stop(); 
-      }
-      if (isSakhiSpeaking) {
-          micStatus.textContent = "Please wait until I finish speaking.";
-          return;
-      }
-
+      if (isRecognitionRunning && recognition) recognition.stop(); 
+      if (isSakhiSpeaking) { micStatus.textContent = "Please wait until I finish speaking."; return; }
       const message = userInput.value.trim();
       if (message === '') return;
-      
       const userMsg = document.createElement('div');
       userMsg.className = 'user-message';
       userMsg.innerHTML = `${message}<span class="timestamp">${getCurrentTime()}</span>`;
       chatBox.appendChild(userMsg);
       userInput.value = '';
       chatBox.scrollTop = chatBox.scrollHeight;
-      
       const thinkingMsg = document.createElement('div');
       thinkingMsg.className = 'bot-message';
-      thinkingMsg.innerHTML = `
-        <div class="bot-avatar">S</div>
-        <div class="message-content">
-            <div class="typing-indicator"><span></span><span></span><span></span></div>
-            <span class="timestamp">${getCurrentTime()}</span>
-        </div>
-      `;
+      thinkingMsg.innerHTML = `<div class="bot-avatar">S</div><div class="message-content"><div class="typing-indicator"><span></span><span></span><span></span></div><span class="timestamp">${getCurrentTime()}</span></div>`;
       chatBox.appendChild(thinkingMsg);
       chatBox.scrollTop = chatBox.scrollHeight;
-
       try {
         const response = await fetch('{% url "chatbot_api" %}', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-          },
-          body: JSON.stringify({
-              message: message,
-              lang: langSelect.value 
-          })
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+          body: JSON.stringify({ message: message, lang: langSelect.value })
         });
-        
         if (!response.ok) throw new Error("Server error, check console.");
         const data = await response.json();
         const botReply = data.reply;
-        
         thinkingMsg.className = 'bot-message';
         const htmlReply = markdownToHTML(botReply);
-        thinkingMsg.innerHTML = `
-            <div class="bot-avatar">S</div>
-            <div class="message-content">
-                ${htmlReply}
-                <span class="timestamp">${getCurrentTime()}</span>
-            </div>
-        `;
-        
+        thinkingMsg.innerHTML = `<div class="bot-avatar">S</div><div class="message-content">${htmlReply}<span class="timestamp">${getCurrentTime()}</span></div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
-
         const textToSpeak = botReply.replace(/[\*#]/g, '');
         const replyLang = langSelect.value;
-
-        if (isVoiceInput) {
-            speakText(textToSpeak, replyLang);
-        }
-        
+        if (isVoiceInput) { speakText(textToSpeak, replyLang); }
         isVoiceInput = false;
-
       } catch (error) {
         console.error('Error:', error);
         thinkingMsg.className = 'bot-message';
-        thinkingMsg.innerHTML = `
-            <div class="bot-avatar">S</div>
-            <div class="message-content">
-                <p>Sorry, an error occurred: ${error.message}</p>
-                <span class="timestamp">${getCurrentTime()}</span>
-            </div>
-        `;
+        thinkingMsg.innerHTML = `<div class="bot-avatar">S</div><div class="message-content"><p>Sorry, an error occurred: ${error.message}</p><span class="timestamp">${getCurrentTime()}</span></div>`;
       }
     }
-    
-    // --- 7. Preloader Script (Keeping original structure for safety) ---
-    const facts = [
-        "India is the world's largest producer of milk, pulses, and jute.",
-        "The monsoon is often called the 'true finance minister of India'.",
-        "The Green Revolution in India started in the 1960s.",
-    ];
-    
-    const preloader = document.getElementById('preloader');
-    const factText = document.getElementById('preloader-fact');
-    const loaderText = document.getElementById('preloader-text');
-
-    if (factText) {
-        factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-    }
-    
-    let factInterval = setInterval(function() {
-        if (factText) {
-            factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-        }
-    }, 3000);
-
-    window.onload = () => {
-        clearInterval(factInterval);
-        if (preloader) {
-            preloader.style.opacity = '0';
-            setTimeout(() => {
-                preloader.style.display = 'none';
-            }, 500);
-        }
-    };
 </script>
+</body>
+</html>
