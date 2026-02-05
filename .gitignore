@@ -1,5 +1,5 @@
 .env
- 
+git initstatic_root/
 __pycache__/
 *.pyc
 media/
