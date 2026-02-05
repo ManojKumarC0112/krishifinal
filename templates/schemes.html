@@ -1,408 +1,159 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 {% load static %}
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Government Schemes - Krishi Sakhi</title>
-  <link rel="stylesheet" href="{% static 'css/schemes.css' %}">
-  <link rel="stylesheet" href="{% static 'css/global_styles.css' %}">
-  
-  <style>
-    /* Navbar Styles */
-    .navbar {
+
+{% block title %}Government Schemes - Krishi Sakhi{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/schemes.css' %}">
+<style>
+    /* Responsive Overrides */
+    .schemes {
+        padding-top: 2rem; 
+        text-align: center;
+    }
+    
+    .scheme-container {
+        display: grid;
+        /* Mobile-friendly grid: Cards shrink to 280px but fill width */
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .scheme-card {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #2c5e2e;
-        padding: 1rem 2rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        position: fixed;
-        width: 100%;
-        top: 0;
-        z-index: 1000;
-        box-sizing: border-box; /* Added */
-    }
-    .navbar .logo {
-        font-size: 1.6rem;
-        font-weight: bold;
-        color: #fff;
+        flex-direction: column;
         text-decoration: none;
+        color: #333;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        overflow: hidden;
+        border: 1px solid #eee;
     }
-    .navbar .nav-links {
-        display: flex;
-        align-items: center;
+
+    .scheme-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        border-color: #a7d3a6;
     }
-    .navbar .nav-links a {
-        color: white;
-        text-decoration: none;
-        margin-left: 1.5rem;
-        font-weight: 500;
-        font-size: 1rem;
-        padding: 8px 0;
-        border-bottom: 2px solid transparent;
-    }
-    .navbar .nav-links a:hover,
-    .navbar .nav-links a.active {
-        color: #a7d3a6;
-        border-bottom: 2px solid #a7d3a6;
-    }
-    .navbar .nav-auth {
+
+    .scheme-card-header {
         display: flex;
         align-items: center;
         gap: 1rem;
-    }
-    .navbar .nav-auth a.btn-auth-link {
-        color: white;
-        text-decoration: none;
-        margin-left: 1.5rem;
-        font-weight: 500;
-        padding: 0.5rem 1rem;
-        border: 1px solid #a7d3a6;
-        border-radius: 20px;
-    }
-    .navbar .nav-auth a.btn-auth-link:hover {
-        background-color: #a7d3a6;
-        color: #2c5e2e;
+        padding: 1rem;
+        background: #f1f8e9;
+        border-bottom: 1px solid #e0e0e0;
     }
 
-    /* --- ✅ MENU FIXES --- */
-    .profile-menu, .language-menu {
-        position: relative;
-        display: inline-block;
-        vertical-align: middle; 
-        cursor: pointer;
-        color: white;
-        padding: 10px 0;
-    }
-    .profile-menu::after, .language-menu::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 20px; 
-        background: transparent;
-    }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #fff;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1001;
-        right: 0;
-        top: 100%;
-        margin-top: 0px; 
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .dropdown-content a {
-        color: black !important;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-        margin-left: 0 !important;
-    }
-    .dropdown-content a:hover {
-        background-color: #f1f1f1;
-    }
-    .profile-menu:hover .dropdown-content,
-    .language-menu:hover .dropdown-content {
-        display: block;
-    }
-    .goog-te-banner-frame.skiptranslate {
-        display: none !important;
-    } 
-    body {
-        top: 0px !important; 
-    }
-    #google_translate_element {
-        display: none; 
-    }
-    /* --- ✅ END MENU FIXES --- */
-  
-    /* Schemes Styles */
-    .scheme-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-      padding: 1rem;
-    }
-    .scheme-card {
-      display: block;
-      text-decoration: none;
-      color: #333;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    .scheme-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    }
-    .scheme-card-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.25rem 1.5rem;
-      background: #f1f8e9;
-      border-bottom: 1px solid #e0e0e0;
-    }
     .scheme-card-icon {
-      font-size: 1.8rem;
+        font-size: 2rem;
     }
+
     .scheme-card-header-text {
-      flex: 1;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #2c5e2e;
+        text-align: left;
     }
-    .scheme-tag {
-      display: inline-block;
-      font-size: 0.8rem;
-      font-weight: bold;
-      padding: 4px 10px;
-      border-radius: 15px;
-      color: #2c5e2e;
-      background-color: #dcedc8;
-    }
+
     .scheme-card-content {
-      padding: 1.5rem;
+        padding: 1.5rem;
+        text-align: left;
+        flex-grow: 1; /* Pushes footer down */
     }
-    .scheme-card-content h3 {
-      color: #2c5e2e;
-      margin-top: 0;
-      margin-bottom: 0.75rem;
+
+    .scheme-tag {
+        display: inline-block;
+        font-size: 0.75rem;
+        background: #dcedc8;
+        color: #33691e;
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-top: 5px;
     }
-    .scheme-card-content p {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: #333;
+
+    .scheme-footer {
+        padding: 10px;
+        background: #fafafa;
+        border-top: 1px solid #eee;
+        color: #4CAF50;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: right;
     }
-    .scheme-card-footer {
-      padding: 1rem 1.5rem;
-      border-top: 1px solid #f0f0f0;
-      text-align: right;
+
+    @media (max-width: 768px) {
+        .scheme-card-header {
+            /* On phone, stack icon and text if title is long */
+            align-items: flex-start; 
+        }
     }
-    .scheme-card-footer p {
-      font-weight: bold;
-      color: #4CAF50;
-      margin: 0;
-    }
-    
-  </style>
-  
-</head>
-<body>
+</style>
+{% endblock %}
 
-  <div id="google_translate_element"></div>
-
-  <div id="preloader">
-      <div id="preloader-spinner"></div>
-      <p id="preloader-text">Loading... Please wait.</p>
-      <p id="preloader-fact"></p>
-  </div>
-  <nav class="navbar">
-      <a class="logo" href="{% url 'index' %}">
-    <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 50px; vertical-align: middle; margin-right: 10px;">
-    Krishi Sakhi
-</a>
-
-      <div class="nav-links">
-          <a href="{% url 'index' %}">Home</a>
-          <a href="{% url 'analyze_field_dashboard' %}">Analyze Field </a> 
-
-          <a href="{% url 'live_vision' %}">Live Vision</a>
-          <a href="{% url 'crop_prices' %}" id="prices-link">Market Prices</a>
-          <a href="{% url 'schemes' %}" id="schemes-link" class="active">Schemes</a>
-          <a href="{% url 'weather' %}">Weather</a>
-          <a href="{% url 'chatbot' %}">Chat</a>
-      </div>
-
-      <div class="nav-auth">
-          {% if user.is_authenticated %}
-              
-              <div class="language-menu">
-                  <div class="lang-icon" style="font-size: 1.5rem;">🌐</div>
-                  <div class="dropdown-content">
-                      <a href="#" onclick="switchLanguage('en'); return false;">English</a>
-                      <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
-                      <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
-                      <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
-                      <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
-                  </div>
-              </div>
-              
-              <div class="profile-menu">
-                  <div class="profile-pic">
-                      {{ user.username|first|upper|default:'K' }}
-                  </div>
-                  <div class="dropdown-content">
-                      <div class="dropdown-header">
-                          <strong>{{ user.first_name|default:user.username }}</strong>
-                          <span>{{ user.email }}</span>
-                      </div>
-                      <a href="{% url 'profile' %}">View Profile</a>
-                      <a href="{% url 'personalize' %}">My Farm</a>
-                      <a href="{% url 'history' %}">Prediction History</a>
-                      <a href="{% url 'logout' %}" class="logout-link">Logout</a>
-                  </div>
-              </div>
-
-          {% else %}
-              <a href="{% url 'login' %}" class="btn-auth-link">Login</a>
-              <a href="{% url 'signup' %}" class="btn-auth-link">Sign Up</a>
-          {% endif %}
-      </div>
-  </nav>
-
-  <section class="schemes">
+{% block content %}
+<section class="schemes">
     <h1>Government Schemes for Farmers 🌾</h1>
     <p>Live schemes fetched and categorized by Sakhi AI.</p>
     
-    <div class="scheme-container" id="schemeContainer">
-      
+    <div class="scheme-container">
       {% if error %}
-        <p class="no-schemes" style="color: red;">{{ error }}</p>
-      
+        <p style="color: red; font-weight: bold;">{{ error }}</p>
       {% else %}
         
         {% for scheme in schemes %}
-          <a class="scheme-card" href="{{ scheme.url }}" target="_blank" rel="noopener noreferrer">
+          <a class="scheme-card" href="{{ scheme.url }}" target="_blank">
               
               <div class="scheme-card-header">
-                  {% if 'KISAN' in scheme.name or 'Finance' in scheme.name %}
+                  {% if 'KISAN' in scheme.name or 'Finance' in scheme.name or 'Nidhi' in scheme.name %}
                       <div class="scheme-card-icon">💰</div>
-                      <div class="scheme-card-header-text"><span class="scheme-tag">Financial Aid</span></div>
-                  {% elif 'PMFBY' in scheme.name or 'Insurance' in scheme.name %}
+                      <div class="scheme-card-header-text">
+                          {{ scheme.name }}<br>
+                          <span class="scheme-tag">Financial Support</span>
+                      </div>
+                  {% elif 'PMFBY' in scheme.name or 'Insurance' in scheme.name or 'Fasal' in scheme.name %}
                       <div class="scheme-card-icon">☂️</div>
-                      <div class="scheme-card-header-text"><span class="scheme-tag">Crop Insurance</span></div>
-                  {% elif 'eNAM' in scheme.name or 'Market' in scheme.name %}
+                      <div class="scheme-card-header-text">
+                          {{ scheme.name }}<br>
+                          <span class="scheme-tag">Crop Insurance</span>
+                      </div>
+                  {% elif 'Market' in scheme.name or 'eNAM' in scheme.name or 'Mandi' in scheme.name %}
                       <div class="scheme-card-icon">📈</div>
-                      <div class="scheme-card-header-text"><span class="scheme-tag">Market Linkage</span></div>
+                      <div class="scheme-card-header-text">
+                          {{ scheme.name }}<br>
+                          <span class="scheme-tag">Market Linkage</span>
+                      </div>
+                  {% elif 'Soil' in scheme.name or 'Health' in scheme.name %}
+                      <div class="scheme-card-icon">🌱</div>
+                      <div class="scheme-card-header-text">
+                          {{ scheme.name }}<br>
+                          <span class="scheme-tag">Soil Health</span>
+                      </div>
                   {% else %}
                       <div class="scheme-card-icon">📄</div>
-                      <div class="scheme-card-header-text"><span class="scheme-tag">General Scheme</span></div>
+                      <div class="scheme-card-header-text">
+                          {{ scheme.name }}<br>
+                          <span class="scheme-tag">General Scheme</span>
+                      </div>
                   {% endif %}
               </div>
               
               <div class="scheme-card-content">
-                  <h3>{{ scheme.name }}</h3>
                   <p>{{ scheme.description }}</p>
               </div>
-              
-              <div class="scheme-card-footer">
-                  <p>Visit Official Site →</p>
+
+              <div class="scheme-footer">
+                  View Details &rarr;
               </div>
           </a>
         {% empty %}
-          <p class="no-schemes">No schemes are currently available. Please check back later.</p>
+          <p>No schemes found. Please check your internet connection or try again later.</p>
         {% endfor %}
         
       {% endif %}
-      
     </div>
-  </section>
-
-  <footer>
-    <p>© 2025 Krishi Sakhi | Smart Farming Assistant</p>
-  </footer>
-
-  <a href="{% url 'chatbot' %}" class="chat-widget-button" title="Chat with Sakhi">
-      💬
-  </a>
-
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: 'en,hi,ta,te,kn',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false
-        }, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-  <script>
-      // ✅ Aggressive Language Switcher Logic
-      function switchLanguage(langCode) {
-          var cookieVal = "/en/" + langCode;
-          document.cookie = "googtrans=" + cookieVal + "; path=/";
-          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + window.location.hostname;
-          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.127.0.0.1";
-          document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.localhost";
-          
-          fetch('{% url "personalize" %}', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'X-CSRFToken': '{{ csrf_token }}'
-              },
-              body: `language=${langCode}`
-          })
-          .then(() => {
-              var newUrl = new URL(window.location.href);
-              newUrl.searchParams.set('lang', langCode);
-              window.location.href = newUrl.toString();
-          })
-          .catch(() => {
-              var newUrl = new URL(window.location.href);
-              newUrl.searchParams.set('lang', langCode);
-              window.location.href = newUrl.toString();
-          });
-      }
-
-      const facts = [
-          "India is the world's largest producer of milk, pulses, and jute.",
-          "The monsoon is often called the 'true finance minister of India'.",
-          "India's agriculture sector employs nearly half of the country's workforce.",
-          "The staple crop Rice covers the largest area under cultivation in India.",
-          "The Green Revolution in India started in the 1960s.",
-          "India has 15 different agro-climatic zones.",
-          "Black soil (Regur soil) is ideal for growing cotton and sugarcane."
-      ];
-      
-      const preloader = document.getElementById('preloader');
-      const factText = document.getElementById('preloader-fact');
-      const loaderText = document.getElementById('preloader-text');
-
-      if (factText) {
-          factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-          let factInterval = setInterval(function() {
-              if (factText) {
-                  factText.innerHTML = facts[Math.floor(Math.random() * facts.length)];
-              }
-          }, 3000);
-      }
-
-      function attachLoader(linkId, text) {
-          const link = document.getElementById(linkId);
-          if (link) {
-              link.addEventListener('click', function(e) {
-                  if (loaderText) {
-                      loaderText.innerText = text;
-                  }
-                  if (preloader) {
-                      preloader.style.opacity = '1';
-                      preloader.style.display = 'flex';
-                  }
-              });
-          }
-      }
-      
-      attachLoader('schemes-link', 'Fetching latest schemes suitable for you...');
-      attachLoader('prices-link', 'Fetching live market prices...');
-
-      window.onload = () => {
-          if (preloader) {
-              preloader.style.opacity = '0'; 
-              setTimeout(() => {
-                  preloader.style.display = 'none';
-              }, 500); 
-          }
-      };
-  </script>
-
-</body>
-</html>
+</section>
+{% endblock %}
