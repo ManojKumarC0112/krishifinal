@@ -1,188 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 {% load static %}
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Chatbot - Sakhi</title>
-  
-  <link rel="stylesheet" href="{% static 'css/global_styles.css' %}">
-  
-  <style>
-    /* --- 1. LAYOUT FUNDAMENTALS --- */
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%; /* Crucial for absolute positioning */
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      overflow: hidden; /* Stop the whole page from scrolling, only chat scrolls */
-    }
+
+{% block title %}Chatbot - Sakhi{% endblock %}
+
+{% block styles %}
+<style>
+    /* 1. LOCK THE BODY */
     body {
-      background: linear-gradient(to right, #e8f5e9, #c8e6c9);
-    }
-
-    /* --- 2. RESPONSIVE NAVBAR --- */
-    .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #2c5e2e;
-        padding: 0.8rem 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        position: fixed;
+        /* Prevent background scroll */
+        position: fixed; 
         width: 100%;
-        top: 0;
-        left: 0;
-        z-index: 1000;
-        box-sizing: border-box;
-        height: 70px; /* Fixed height for calculations */
+        height: 100%;
+        overflow: hidden;
     }
 
-    .navbar .logo {
-        font-size: 1.4rem;
-        font-weight: bold;
-        color: #fff;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Hamburger Icon (Hidden on Desktop) */
-    .hamburger {
-        display: none;
-        font-size: 1.8rem;
-        color: white;
-        cursor: pointer;
-    }
-
-    /* Desktop Nav Links */
-    .nav-links {
-        display: flex;
-        align-items: center;
-    }
-    .nav-links a {
-        color: white;
-        text-decoration: none;
-        margin-left: 1.5rem;
-        font-weight: 500;
-        font-size: 1rem;
-        padding: 8px 0;
-        border-bottom: 2px solid transparent;
-    }
-    .nav-links a:hover, .nav-links a.active {
-        color: #a7d3a6;
-        border-bottom: 2px solid #a7d3a6;
-    }
-
-    .nav-auth {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    /* MOBILE NAVBAR STYLES */
-    @media (max-width: 768px) {
-        .navbar {
-            padding: 0.5rem 1rem;
-        }
-        
-        .hamburger {
-            display: block; /* Show hamburger */
-        }
-
-        .nav-links {
-            display: none; /* Hide links by default */
-            position: absolute;
-            top: 70px; /* Below navbar */
-            left: 0;
-            width: 100%;
-            background-color: #2c5e2e;
-            flex-direction: column;
-            padding: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .nav-links.active {
-            display: flex; /* Show when active */
-        }
-
-        .nav-links a {
-            margin: 10px 0;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .nav-auth {
-            display: none; /* Hide auth on mobile menu to save space, or move inside nav-links */
-        }
-    }
-
-    /* --- 3. ABSOLUTE CHAT LAYOUT (THE SCROLL FIX) --- */
-    /* This wrapper pins the chat to the screen edges */
+    /* 2. CHAT LAYOUT WRAPPER */
     .chatbot-layout-wrapper {
         position: absolute;
-        top: 70px; /* Start exactly below Navbar */
-        bottom: 0; /* Go all the way to bottom */
+        top: 70px; /* Below Navbar */
         left: 0;
         right: 0;
+        bottom: 0; /* Fill remaining space */
+        background: #f4f7f6;
         display: flex;
-        justify-content: center;
-        padding: 15px;
-        box-sizing: border-box;
+        flex-direction: column;
+        z-index: 1;
     }
 
-    .chatbot-container {
-        width: 100%;
-        max-width: 800px;
-        background-color: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0, 128, 0, 0.2);
-        display: flex;
-        flex-direction: column; /* Vertical Stack */
-        overflow: hidden; /* Keep children inside */
-        height: 100%; /* Fill the wrapper */
-    }
-
-    /* --- 4. CHAT COMPONENTS --- */
+    /* 3. HEADER (Fixed at top of chat) */
     .chat-header {
         background-color: #4caf50;
         color: white;
-        padding: 12px 15px;
+        padding: 10px 15px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-shrink: 0; /* Never shrink */
+        height: 50px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         z-index: 10;
     }
-    .chat-header span { font-weight: 600; font-size: 1.1rem; }
-    
-    .header-controls { display: flex; align-items: center; gap: 8px; }
-    .header-controls label { font-size: 0.9rem; color: #fff; }
-    .header-controls select { padding: 4px; border-radius: 4px; border: none; font-size: 0.85rem; }
-    .header-controls button { background-color: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 
-    /* SCROLLABLE AREA */
+    .header-controls { display: flex; gap: 10px; align-items: center; }
+    .header-controls select { padding: 4px; border-radius: 4px; border: none; font-size: 0.85rem; }
+    .header-controls button { background: #d32f2f; color: white; border: none; padding: 4px 8px; border-radius: 4px; }
+
+    /* 4. SCROLLABLE MESSAGES AREA */
     .chat-box {
-        flex: 1; /* Take all available space */
+        flex: 1; 
+        overflow-y: auto; /* Scroll enabled */
         padding: 15px;
-        overflow-y: auto; /* ENABLE SCROLLING HERE */
+        /* CRITICAL: Extra padding at bottom so text isn't hidden behind the input box */
+        padding-bottom: 120px; 
         background-color: #f9fbe7;
         display: flex;
         flex-direction: column;
         gap: 15px;
-        scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
     }
 
-    /* Messages */
+    /* Message Bubbles */
     .user-message {
         background-color: #dcedc8;
         padding: 10px 15px;
         border-radius: 15px 15px 0 15px;
         align-self: flex-end;
-        max-width: 75%;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        max-width: 80%;
         word-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     .bot-message {
         background-color: #fff;
@@ -190,199 +75,123 @@
         border-radius: 15px 15px 15px 0;
         align-self: flex-start;
         max-width: 85%;
-        border: 1px solid #e0e0e0;
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
+        border: 1px solid #ddd;
+        display: flex; gap: 10px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        word-wrap: break-word;
     }
     .bot-avatar {
-        width: 32px; height: 32px;
-        background-color: #4caf50; color: white;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; background: #4caf50; color: white;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
         font-weight: bold; flex-shrink: 0;
     }
     .timestamp { font-size: 0.7rem; color: #888; margin-top: 4px; display: block; }
 
-    /* INPUT AREA (PINNED BOTTOM) */
+    /* 5. INPUT AREA (PINNED TO GLASS) */
+    /* This overrides Flexbox and sticks it to the screen bottom */
     .chat-input-container {
-        padding: 10px;
-        background-color: #fff;
-        border-top: 1px solid #eee;
-        flex-shrink: 0; /* Never shrink */
-        padding-bottom: env(safe-area-inset-bottom, 10px); /* iPhone Safety */
+        position: fixed; 
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #ffffff;
+        padding: 12px;
+        border-top: 1px solid #ddd;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        z-index: 9999; /* Always on top */
+        box-sizing: border-box;
+        
+        /* Safety padding for iPhone X Home Bar */
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)); 
     }
-    .chat-input { display: flex; gap: 8px; }
+
+    .chat-input {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        max-width: 800px; /* Keep it neat on desktop */
+        margin: 0 auto;
+    }
+
     .chat-input input {
         flex: 1;
-        padding: 12px;
-        border: 1px solid #ddd;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
         border-radius: 25px;
-        outline: none;
         font-size: 1rem;
+        outline: none;
+        background: #f9f9f9;
     }
-    .chat-input button {
-        width: 45px; height: 45px;
-        border-radius: 50%; border: none;
-        background-color: #4caf50; color: white;
-        font-size: 1.2rem; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-    }
-    #mic-status { text-align: center; font-size: 0.75rem; color: #666; margin-top: 5px; height: 15px; }
-    .mic-recording { background-color: #e53935 !important; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .chat-input input:focus { border-color: #4caf50; background: #fff; }
 
-    /* --- MOBILE TWEAKS --- */
+    .chat-input button {
+        width: 48px; height: 48px;
+        border-radius: 50%; border: none;
+        background: #4caf50; color: white;
+        font-size: 1.3rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Mobile Tweaks */
     @media (max-width: 768px) {
-        .chatbot-layout-wrapper {
-            padding: 0; /* Full width */
-        }
-        .chatbot-container {
-            border-radius: 0;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-        }
-        .header-controls label { display: none; } /* Hide label */
+        .header-controls label { display: none; }
         .chat-header span { font-size: 1rem; }
     }
     
-    /* Dropdown Styles (kept from your code) */
-    .profile-menu, .language-menu { position: relative; display: inline-block; cursor: pointer; color: white; }
-    .dropdown-content { display: none; position: absolute; background-color: #fff; min-width: 160px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1001; right: 0; top: 100%; border-radius: 8px; overflow: hidden; }
-    .dropdown-content a { color: black !important; padding: 12px 16px; text-decoration: none; display: block; }
-    .dropdown-content a:hover { background-color: #f1f1f1; }
-    .profile-menu:hover .dropdown-content, .language-menu:hover .dropdown-content { display: block; }
-    #google_translate_element { display: none; }
-  </style>
-</head>
-<body>
-  {% csrf_token %}
-  <div id="google_translate_element"></div>
+    #mic-status { text-align: center; font-size: 0.75rem; color: #666; height: 16px; margin-top: 5px;}
+    .mic-recording { background-color: #e53935 !important; animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+</style>
+{% endblock %}
 
-  <nav class="navbar">
-      <a class="logo" href="{% url 'index' %}">
-        <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
-        Krishi Sakhi
-      </a>
-
-      <div class="hamburger" onclick="toggleMobileMenu()">☰</div>
-
-      <div class="nav-links" id="navLinks">
-          <a href="{% url 'index' %}">Home</a>
-          <a href="{% url 'analyze_field_dashboard' %}">Analyze Field 🧠</a> 
-          <a href="{% url 'crop_prices' %}">Market Prices</a>
-          <a href="{% url 'schemes' %}">Schemes</a>
-          <a href="{% url 'weather' %}">Weather</a>
-          <a href="{% url 'chatbot' %}" class="active">Chat</a>
-      </div>
-
-      <div class="nav-auth">
-          {% if user.is_authenticated %}
-              <div class="language-menu">
-                  <div class="lang-icon" style="font-size: 1.5rem;">🌐</div>
-                  <div class="dropdown-content">
-                      <a href="#" onclick="switchLanguage('en'); return false;">English</a>
-                      <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
-                      <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
-                      <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
-                      <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
-                  </div>
-              </div>
-              <div class="profile-menu">
-                  <div class="profile-pic">{{ user.username|first|upper|default:'K' }}</div>
-                  <div class="dropdown-content">
-                      <a href="{% url 'profile' %}">Profile</a>
-                      <a href="{% url 'logout' %}">Logout</a>
-                  </div>
-              </div>
-          {% else %}
-              <a href="{% url 'login' %}" class="btn-auth-link">Login</a>
-          {% endif %}
-      </div>
-  </nav>
-
-  <div class="chatbot-layout-wrapper">
-      <div class="chatbot-container">
-        
-        <div class="chat-header">
-          <span>🌾 Sakhi Assistant</span>
-          <div class="header-controls">
+{% block content %}
+<div class="chatbot-layout-wrapper">
+    <div class="chat-header">
+        <span>🌾 Sakhi Assistant</span>
+        <div class="header-controls">
             <label for="lang-select">Lang:</label>
             <select id="lang-select">
-              <option value="en-US">English</option>
-              <option value="hi-IN">Hindi</option>
-              <option value="te-IN">Telugu</option>
-              <option value="ta-IN">Tamil</option>
-              <option value="kn-IN">Kannada</option>
+                <option value="en-US">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="te-IN">Telugu</option>
+                <option value="ta-IN">Tamil</option>
+                <option value="kn-IN">Kannada</option>
             </select>
-            <button id="stop-speech-btn" title="Stop">🔇</button>
-          </div>
+            <button id="stop-speech-btn" title="Stop Speaking">🔇</button>
         </div>
+    </div>
 
-        <div class="chat-box" id="chat-box">
-          <div class="bot-message">
+    <div class="chat-box" id="chat-box">
+        <div class="bot-message">
             <div class="bot-avatar">S</div>
             <div class="message-content">
-                <p>Hi! I'm Sakhi 🌱. How can I help you today?</p>
+                <p>Namaste! I'm Sakhi 🌱. I can help with crops, prices, and schemes.</p>
                 <span class="timestamp">Just now</span>
             </div>
-          </div>
         </div>
+    </div>
 
-        <div class="chat-input-container">
-          <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type or click mic..." onkeydown="handleKey(event)" />
+    <div class="chat-input-container">
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type here..." onkeydown="handleKey(event)" />
             <button id="mic-btn">🎤</button>
             <button id="sendBtn" onclick="handleManualSend()">➤</button>
-          </div>
-          <p id="mic-status"></p>
         </div>
+        <p id="mic-status"></p>
+    </div>
+</div>
+{% endblock %}
 
-      </div>
-  </div>
-
-  <script type="text/javascript">
-    // 1. Mobile Menu Toggle
-    function toggleMobileMenu() {
-        const nav = document.getElementById('navLinks');
-        nav.classList.toggle('active');
+{% block scripts %}
+<script>
+    // --- CHECK FOR HTTPS (For Live Vision/Mic) ---
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        // Just a console warning, or we can alert user
+        console.warn("Camera/Mic requires HTTPS. Please use Ngrok.");
     }
 
-    // 2. Google Translate Init
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: 'en,hi,ta,te,kn',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false
-        }, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-  <script>
-    // 3. Language Switcher
-    function switchLanguage(langCode) {
-        var cookieVal = "/en/" + langCode;
-        document.cookie = "googtrans=" + cookieVal + "; path=/";
-        document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + window.location.hostname;
-        
-        const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        fetch('{% url "personalize" %}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf },
-            body: `language=${langCode}`
-        }).then(() => {
-            var newUrl = new URL(window.location.href);
-            newUrl.searchParams.set('lang', langCode);
-            window.location.href = newUrl.toString();
-        });
-    }
-
-    // 4. Chatbot Logic (Preserved from your code)
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // --- CHATBOT JS ---
+    const csrfToken = '{{ csrf_token }}'; 
     const chatBox = document.getElementById('chat-box');
     const userInput = document.getElementById('user-input');
     const micBtn = document.getElementById('mic-btn');
@@ -390,123 +199,109 @@
     const stopSpeechBtn = document.getElementById('stop-speech-btn');
     const micStatus = document.getElementById('mic-status');
     
-    let isVoiceInput = false; 
-    let isSakhiSpeaking = false; 
-    let isRecognitionRunning = false; 
+    let isSakhiSpeaking = false;
+    let recognition; 
 
-    // TTS Setup
-    const synth = window.speechSynthesis;
-    let voices = [];
-    const voicesLoadedPromise = new Promise((resolve) => {
-        const populateAndResolve = () => {
-            voices = synth.getVoices();
-            if (voices.length > 0) { resolve(); return true; }
-            return false;
-        };
-        if (!populateAndResolve()) synth.onvoiceschanged = populateAndResolve;
-        setTimeout(() => { if (voices.length === 0) populateAndResolve(); resolve(); }, 2000); 
-    });
+    function handleKey(e) { if (e.key === 'Enter') handleManualSend(); }
 
-    async function speakText(text, lang) {
-      await voicesLoadedPromise;
-      synth.cancel();
-      isSakhiSpeaking = true;
-      if (isRecognitionRunning && recognition) recognition.stop(); 
-      const utterance = new SpeechSynthesisUtterance(text);
-      const langShort = lang.split('-')[0];
-      let foundVoice = voices.find(voice => voice.lang.startsWith(langShort) && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('google')));
-      if (!foundVoice) foundVoice = voices.find(voice => voice.lang.startsWith(langShort));
-      if (foundVoice) utterance.voice = foundVoice;
-      utterance.rate = 1.0; 
-      utterance.onend = () => { isSakhiSpeaking = false; };
-      utterance.onerror = () => { isSakhiSpeaking = false; console.error('TTS error'); };
-      synth.speak(utterance);
+    async function handleManualSend() {
+        const text = userInput.value.trim();
+        if (!text) return;
+        
+        addMessage(text, 'user');
+        userInput.value = '';
+        const loadingId = addMessage('Thinking...', 'bot', true);
+
+        try {
+            const response = await fetch('{% url "chatbot_api" %}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ message: text, lang: langSelect.value })
+            });
+            const data = await response.json();
+            document.getElementById(loadingId).remove();
+            addMessage(data.reply, 'bot');
+            speakText(data.reply, langSelect.value);
+        } catch (error) {
+            document.getElementById(loadingId).remove();
+            addMessage("Error: Please check your internet or use Ngrok (HTTPS).", 'bot');
+        }
     }
-    
-    stopSpeechBtn.addEventListener('click', () => {
-      synth.cancel();
-      isSakhiSpeaking = false; 
-      micStatus.textContent = "Speech stopped.";
-    });
 
-    // STT Setup
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      micBtn.addEventListener('click', () => {
-        if (isRecognitionRunning) { recognition.stop(); return; }
-        if (isSakhiSpeaking) { micStatus.textContent = "Please wait, Sakhi is speaking."; return; }
-        micStatus.textContent = "Listening... Speak clearly.";
-        recognition.lang = langSelect.value;
-        try { recognition.start(); micBtn.classList.add('mic-recording'); isRecognitionRunning = true; } catch(e) { console.error("Speech recognition start error:", e); }
-      });
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        userInput.value = transcript;
-        micStatus.textContent = "Sending message...";
-        isVoiceInput = true;
-        setTimeout(sendMessage, 500); 
-      };
-      recognition.onend = () => { micBtn.classList.remove('mic-recording'); isRecognitionRunning = false; };
-      recognition.onerror = (event) => { micBtn.classList.remove('mic-recording'); isRecognitionRunning = false; micStatus.textContent = "Error or no speech."; };
-    } else {
-      micBtn.disabled = true;
-      micBtn.innerHTML = "🚫";
+    function addMessage(text, sender, isLoading=false) {
+        const div = document.createElement('div');
+        div.className = sender === 'user' ? 'user-message' : 'bot-message';
+        div.id = 'msg-' + Date.now();
+        
+        if (sender === 'bot') {
+            div.innerHTML = `<div class="bot-avatar">S</div><div class="message-content">${isLoading ? text : markdownToHTML(text)}<span class="timestamp">${getCurrentTime()}</span></div>`;
+        } else {
+            div.innerHTML = `${text}<span class="timestamp">${getCurrentTime()}</span>`;
+        }
+        
+        chatBox.appendChild(div);
+        // Scroll to the visual bottom (accounting for the fixed input padding)
+        chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+        return div.id;
     }
 
     function markdownToHTML(text) {
-      let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      html = html.replace(/^\*\s(.*)$/gm, '<p style="margin: 0; padding: 2px 0;">• $1</p>');
-      return html;
+        let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/^\*\s(.*)$/gm, '<br>• $1');
+        return html;
     }
+    
     function getCurrentTime() {
-      const now = new Date();
-      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const now = new Date();
+        return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    function handleManualSend() { isVoiceInput = false; sendMessage(); }
-    function handleKey(e) { if (e.key === 'Enter') { isVoiceInput = false; sendMessage(); } }
 
-    async function sendMessage() {
-      if (isRecognitionRunning && recognition) recognition.stop(); 
-      if (isSakhiSpeaking) { micStatus.textContent = "Please wait until I finish speaking."; return; }
-      const message = userInput.value.trim();
-      if (message === '') return;
-      
-      const userMsg = document.createElement('div');
-      userMsg.className = 'user-message';
-      userMsg.innerHTML = `${message}<span class="timestamp">${getCurrentTime()}</span>`;
-      chatBox.appendChild(userMsg);
-      userInput.value = '';
-      chatBox.scrollTop = chatBox.scrollHeight;
-      
-      const thinkingMsg = document.createElement('div');
-      thinkingMsg.className = 'bot-message';
-      thinkingMsg.innerHTML = `<div class="bot-avatar">S</div><div class="message-content">Thinking...<span class="timestamp">${getCurrentTime()}</span></div>`;
-      chatBox.appendChild(thinkingMsg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      
-      try {
-        const response = await fetch('{% url "chatbot_api" %}', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-          body: JSON.stringify({ message: message, lang: langSelect.value })
-        });
-        if (!response.ok) throw new Error("Server error");
-        const data = await response.json();
-        const botReply = data.reply;
+    function speakText(text, lang) {
+        window.speechSynthesis.cancel();
+        isSakhiSpeaking = true;
+        const cleanText = text.replace(/[\*#]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         
-        thinkingMsg.innerHTML = `<div class="bot-avatar">S</div><div class="message-content">${markdownToHTML(botReply)}<span class="timestamp">${getCurrentTime()}</span></div>`;
-        chatBox.scrollTop = chatBox.scrollHeight; // ENSURE SCROLL AFTER REPLY
-        
-        if (isVoiceInput) { speakText(botReply.replace(/[\*#]/g, ''), langSelect.value); }
-        isVoiceInput = false;
-      } catch (error) {
-        thinkingMsg.innerHTML = `<div class="bot-avatar">S</div><div class="message-content">Error: ${error.message}</div>`;
-      }
+        const voices = window.speechSynthesis.getVoices();
+        const langShort = lang.split('-')[0];
+        const voice = voices.find(v => v.lang.startsWith(langShort));
+        if (voice) utterance.voice = voice;
+
+        utterance.onend = () => { isSakhiSpeaking = false; };
+        window.speechSynthesis.speak(utterance);
     }
-  </script>
-</body>
-</html>
+
+    stopSpeechBtn.addEventListener('click', () => {
+        window.speechSynthesis.cancel();
+        isSakhiSpeaking = false;
+    });
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+
+        micBtn.addEventListener('click', () => {
+            if (isSakhiSpeaking) { micStatus.innerText = "Wait..."; return; }
+            micBtn.classList.add('mic-recording');
+            micStatus.innerText = "Listening...";
+            recognition.lang = langSelect.value;
+            try { recognition.start(); } catch(e) {}
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            userInput.value = transcript;
+            micStatus.innerText = "Processing...";
+            setTimeout(() => {
+                handleManualSend();
+                micBtn.classList.remove('mic-recording');
+                micStatus.innerText = "";
+            }, 500);
+        };
+        recognition.onend = () => { micBtn.classList.remove('mic-recording'); };
+    } else {
+        micBtn.style.display = 'none';
+    }
+</script>
+{% endblock %}

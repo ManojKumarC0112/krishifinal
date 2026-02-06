@@ -6,87 +6,192 @@
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/index.css' %}">
 <style>
-    /* 1. RESET BASE LAYOUT FOR HERO PAGE */
-    /* base.html adds a margin for content; we want the hero to be full screen */
+    /* 1. HERO LAYOUT */
     .content-wrapper {
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* 2. HERO ADJUSTMENTS */
     .hero {
-        /* Ensure it covers the screen */
         min-height: 100vh;
-        /* Add padding so content doesn't hide behind the Fixed Navbar */
-        padding-top: 80px; 
+        padding-top: 70px; /* Space for navbar */
         background-size: cover;
         background-position: center;
         display: flex;
         align-items: center;
         justify-content: center;
         text-align: center;
+        position: relative;
+    }
+    
+    .hero::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
     }
 
-    /* 3. MOBILE TWEAKS */
-    @media (max-width: 768px) {
-        .hero-text {
-            width: 90%;
-            padding: 1.5rem;
-        }
-        .hero-text h1 {
-            font-size: 2rem;
-        }
-        
-        /* Stack buttons on phone */
-        .hero-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-            width: 100%;
-        }
-        .hero-buttons .btn {
-            width: 100%; /* Full width buttons */
-            margin: 0 !important;
-        }
+    .hero-text {
+        position: relative;
+        z-index: 2;
+        color: white;
     }
+
+    /* 2. MOBILE BUTTONS */
+    @media (max-width: 768px) {
+        .hero-text { width: 90%; padding: 1.5rem; }
+        .hero-text h1 { font-size: 2rem; }
+        .hero-buttons {
+            display: flex; flex-direction: column; gap: 15px;
+            align-items: center; width: 100%;
+        }
+        .hero-buttons .btn { width: 100%; margin: 0 !important; }
+    }
+
+    /* 3. ONBOARDING POPUP STYLES */
+    .onboarding-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 3000; display: none;
+        align-items: center; justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+    .onboarding-card {
+        background: white; width: 85%; max-width: 350px;
+        border-radius: 20px; padding: 30px 20px;
+        text-align: center; position: relative;
+        animation: slideUp 0.5s ease-out;
+    }
+    .ob-icon { font-size: 5rem; margin-bottom: 20px; display: block; animation: float 3s infinite; }
+    .ob-title { font-size: 1.5rem; color: #2c5e2e; margin-bottom: 10px; font-weight: 800; }
+    .ob-desc { font-size: 1.1rem; color: #555; margin-bottom: 25px; line-height: 1.4; }
+    .ob-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; }
+    .dot { width: 12px; height: 12px; background: #ddd; border-radius: 50%; transition: all 0.3s; }
+    .dot.active { background: #4CAF50; transform: scale(1.3); }
+
+    .ob-btn {
+        background: #4CAF50; color: white; border: none;
+        padding: 15px 40px; border-radius: 30px;
+        font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%;
+    }
+    .ob-skip { margin-top: 15px; font-size: 0.9rem; color: #888; cursor: pointer; text-decoration: underline; display: inline-block; }
+
+    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 </style>
 {% endblock %}
 
 {% block content %}
   <section class="hero">
     <div class="hero-text">
-      
       {% if user.is_authenticated %}
-        <h1 id="greeting">{{ timeGreeting|default:"Welcome" }}, {{ user.username }}! 🌾</h1>
+        <h1 id="greeting">{{ timeGreeting|default:"Namaste" }}, {{ user.username }}! 🌾</h1>
         <p>What would you like to do today?</p>
         
         <div class="hero-buttons">
             <a href="{% url 'analyze_field_dashboard' %}" class="btn">Analyze Field</a>
             <a href="{% url 'crop_prices' %}" class="btn" style="background: #ffc107; color: #333; margin-left: 10px;">Check Prices</a>
         </div>
-
+        
+        <div style="margin-top: 30px;">
+            <a href="#" onclick="startOnboarding(); return false;" style="color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1rem; border-bottom: 1px dotted white; padding-bottom: 2px;">
+                ℹ️ How to use this app?
+            </a>
+        </div>
       {% else %}
         <h1>Welcome to Krishi Sakhi</h1>
         <p>Your smart farming assistant using AI 🌱</p>
         <a href="{% url 'login' %}" class="btn">Login to Start</a>
       {% endif %}
-      
     </div>
   </section>
 
-  <footer style="text-align: center; padding: 1rem; background-color: #006400; color: #fff;">
+  <footer style="text-align: center; padding: 1rem; background-color: #006400; color: #fff; position: relative; z-index: 2;">
     <p>© 2025 Krishi Sakhi | By MNV Nexus 🌾</p>
   </footer>
 
-  <a href="{% url 'chatbot' %}" class="chat-widget-button" title="Chat with Sakhi" style="
-      position: fixed; bottom: 20px; right: 20px; 
-      background: #4CAF50; color: white; 
-      width: 60px; height: 60px; border-radius: 50%; 
-      display: flex; align-items: center; justify-content: center; 
-      font-size: 30px; text-decoration: none; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 2000;">
-      💬
-  </a>
+  <div class="onboarding-overlay" id="onboardingModal">
+      <div class="onboarding-card">
+          <span class="ob-icon" id="obIcon">📸</span>
+          <div class="ob-title" id="obTitle">Identify Diseases</div>
+          <div class="ob-desc" id="obDesc">Take a photo...</div>
+          <div class="ob-dots">
+              <span class="dot active" id="dot0"></span>
+              <span class="dot" id="dot1"></span>
+              <span class="dot" id="dot2"></span>
+          </div>
+          <button class="ob-btn" onclick="nextSlide()" id="obBtn">Next</button>
+          <div class="ob-skip" onclick="closeOnboarding()">Skip Tutorial</div>
+      </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const allTranslations = {
+        'en': [
+            { icon: "📸", title: "1. Scan Your Crop", desc: "Click <b>'Analyze Field'</b>. Take a photo of your plant to detect diseases and get treatment." },
+            { icon: "🗣️", title: "2. Talk to Sakhi", desc: "Click the <b>'Chat'</b> button below. Press the Mic 🎤 and ask questions in your language!" },
+            { icon: "💰", title: "3. Get Money", desc: "Click <b>'Schemes'</b> to find government money and <b>'Market Prices'</b> for the best rates." }
+        ],
+        'hi': [
+            { icon: "📸", title: "1. फसल स्कैन करें", desc: "<b>'Analyze Field'</b> पर क्लिक करें. अपनी फसल की फोटो लें और बीमारी का इलाज पाएं." },
+            { icon: "🗣️", title: "2. सखी से बात करें", desc: "नीचे <b>'Chat'</b> बटन दबाएं. माइक 🎤 का उपयोग करें और अपनी भाषा में सवाल पूछें!" },
+            { icon: "💰", title: "3. मुनाफा कमाएं", desc: "सरकारी योजनाओं के लिए <b>'Schemes'</b> देखें और सही दाम के लिए <b>'Market Prices'</b> चेक करें." }
+        ],
+        'ta': [
+            { icon: "📸", title: "1. பயிரை ஸ்கேன் செய்யவும்", desc: "<b>'Analyze Field'</b> கிளிக் செய்யவும். நோயைக் கண்டறிய உங்கள் பயிரின் புகைப்படத்தை எடுக்கவும்." },
+            { icon: "🗣️", title: "2. சகியுடன் பேசுங்கள்", desc: "கீழே உள்ள <b>'Chat'</b> பட்டனை கிளிக் செய்யவும். மைக் 🎤 மூலம் உங்கள் மொழியில் கேள்வி கேளுங்கள்!" },
+            { icon: "💰", title: "3. அதிக லாபம்", desc: "அரசு மானியங்களுக்கு <b>'Schemes'</b> மற்றும் சந்தை விலைக்கு <b>'Market Prices'</b> பார்க்கவும்." }
+        ],
+        'te': [
+            { icon: "📸", title: "1. పంటను స్కాన్ చేయండి", desc: "<b>'Analyze Field'</b> క్లిక్ చేయండి. తెగుళ్ళను గుర్తించడానికి మీ పంట ఫోటో తీయండి." },
+            { icon: "🗣️", title: "2. సఖితో మాట్లాడండి", desc: "కింద ఉన్న <b>'Chat'</b> బటన్ నొక్కండి. మైక్ 🎤 ద్వారా మీ భాషలో ప్రశ్నలు అడగండి!" },
+            { icon: "💰", title: "3. లాభాలను పొందండి", desc: "ప్రభుత్వ పథకాల కోసం <b>'Schemes'</b> మరియు మార్కెట్ ధరల కోసం <b>'Market Prices'</b> చూడండి." }
+        ],
+        'kn': [
+            { icon: "📸", title: "1. ಬೆಳೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ", desc: "<b>'Analyze Field'</b> ಕ್ಲಿಕ್ ಮಾಡಿ. ರೋಗ ಪತ್ತೆಹಚ್ಚಲು ನಿಮ್ಮ ಬೆಳೆಯ ಫೋಟೋ ತೆಗೆಯಿರಿ." },
+            { icon: "🗣️", title: "2. ಸಖಿ ಜೊತೆ ಮಾತನಾಡಿ", desc: "ಕೆಳಗಿನ <b>'Chat'</b> ಬಟನ್ ಒತ್ತಿರಿ. ಮೈಕ್ 🎤 ಬಳಸಿ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಪ್ರಶ್ನೆ ಕೇಳಿ!" },
+            { icon: "💰", title: "3. ಲಾಭ ಪಡೆಯಿರಿ", desc: "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳಿಗೆ <b>'Schemes'</b> ಮತ್ತು ಮಾರುಕಟ್ಟೆ ದರಗಳಿಗೆ <b>'Market Prices'</b> ಪರಿಶೀಲಿಸಿ." }
+        ]
+    };
+
+    let currentSlide = 0;
+    let currentLang = 'en';
+    const modal = document.getElementById('onboardingModal');
+
+    function detectLanguage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('lang')) return urlParams.get('lang');
+        const match = document.cookie.match(/googtrans=\/en\/(\w+)/);
+        if (match && match[1]) return match[1];
+        return 'en';
+    }
+
+    window.addEventListener('load', () => {
+        currentLang = detectLanguage();
+        if (!allTranslations[currentLang]) currentLang = 'en';
+        if (!localStorage.getItem('seenOnboarding_v4')) {
+            setTimeout(() => { startOnboarding(); }, 1000); 
+        }
+    });
+
+    function startOnboarding() { currentSlide = 0; updateSlide(); modal.style.display = 'flex'; }
+    function nextSlide() { if (currentSlide < 2) { currentSlide++; updateSlide(); } else { closeOnboarding(); } }
+    function closeOnboarding() { modal.style.display = 'none'; localStorage.setItem('seenOnboarding_v4', 'true'); }
+    function updateSlide() {
+        const data = allTranslations[currentLang][currentSlide];
+        document.getElementById('obIcon').innerText = data.icon;
+        document.getElementById('obTitle').innerText = data.title;
+        document.getElementById('obDesc').innerHTML = data.desc;
+        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        const btn = document.getElementById('obBtn');
+        const finishText = { 'en': "Start Farming 🚀", 'hi': "शुरू करें 🚀", 'ta': "தொடங்கவும் 🚀", 'te': "ప్రారంభించండి 🚀", 'kn': "ಪ್ರಾರಂಭಿಸಿ 🚀" };
+        const nextText = { 'en': "Next", 'hi': "अगला", 'ta': "அடுத்து", 'te': "తరువాత", 'kn': "ಮುಂದೆ" };
+        btn.innerText = (currentSlide === 2) ? (finishText[currentLang] || finishText['en']) : (nextText[currentLang] || nextText['en']);
+        btn.style.background = (currentSlide === 2) ? "#2c5e2e" : "#4CAF50";
+    }
+</script>
 {% endblock %}

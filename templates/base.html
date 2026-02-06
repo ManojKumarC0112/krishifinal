@@ -3,270 +3,193 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Krishi Sakhi{% endblock %}</title>
     
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2c5e2e">
 
     <link rel="stylesheet" href="{% static 'css/global_styles.css' %}">
     
     <style>
-        /* Basic Reset */
+        /* --- 1. BASE STYLES --- */
         body, html {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f4f7f6;
             color: #333;
-            top: 0 !important; 
-        }
-
-        /* --- Navigation Bar --- */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #2c5e2e;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: fixed; 
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-sizing: border-box; 
-        }
-        .navbar .logo {
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #fff;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-        
-        .navbar .nav-links {
-            display: flex;
-            align-items: center;
-        }
-        .navbar .nav-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-weight: 500;
-            font-size: 1rem;
-            padding: 8px 0;
-            border-bottom: 2px solid transparent;
-        }
-        .navbar .nav-links a:hover,
-        .navbar .nav-links a.active {
-            color: #a7d3a6;
-            border-bottom: 2px solid #a7d3a6;
-        }
-        
-        .nav-auth {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-shrink: 0;
-        }
-        
-        .profile-menu, .language-menu {
+            overscroll-behavior-y: none; 
+            /* Allow Google Translate to shift the page */
             position: relative;
-            display: inline-block;
-            vertical-align: middle; 
-            cursor: pointer;
-            color: white;
-            padding: 10px 0; /* ✅ Fix: Larger hit area */
+            min-height: 100%;
         }
         
-        /* ✅ Fix: Invisible bridge to prevent menu from closing */
-        .profile-menu::after, .language-menu::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            height: 20px; /* Extends hit area downwards */
-            background: transparent;
+        body { padding-top: 70px; }
+
+        /* --- 2. NAVBAR (Fixed) --- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #2c5e2e; padding: 0 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: fixed; width: 100%; height: 70px;
+            /* Top will be adjusted by JS */
+            top: 0; left: 0; z-index: 1000; box-sizing: border-box; 
+            padding-top: env(safe-area-inset-top); 
+            height: calc(70px + env(safe-area-inset-top));
+            transition: top 0.3s ease; /* Smooth slide */
+        }
+        
+        .logo {
+            font-size: 1.3rem; font-weight: bold; color: #fff;
+            text-decoration: none; display: flex; align-items: center; z-index: 1002;
         }
 
-        /* Dropdown Styling */
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #fff;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1001;
-            right: 0;
-            top: 100%; /* ✅ Fix: Aligns perfectly to bottom */
-            margin-top: 0px; 
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .dropdown-content a {
-            color: black !important;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            margin-left: 0 !important;
-        }
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-        .profile-menu:hover .dropdown-content,
-        .language-menu:hover .dropdown-content {
-            display: block;
-        }
-
-        /* --- Mobile Hamburger --- */
+        /* --- 3. RIGHT SIDE CONTROLS --- */
+        .nav-right-group { display: flex; align-items: center; gap: 15px; }
+        .nav-auth-icons { display: flex; align-items: center; gap: 12px; }
         .hamburger {
-            display: none;
-            font-size: 1.8rem;
-            color: white;
-            cursor: pointer;
+            display: none; font-size: 1.8rem; color: white;
+            cursor: pointer; z-index: 1002; padding: 5px;
         }
 
-        /* --- Mobile Responsiveness --- */
+        /* --- 4. NAVIGATION LINKS --- */
+        .nav-links-desktop { display: flex; gap: 1.5rem; }
+        .nav-links-desktop a {
+            color: white; text-decoration: none; font-weight: 500; font-size: 1rem;
+            padding: 8px 0; border-bottom: 2px solid transparent; transition: 0.3s;
+        }
+        .nav-links-desktop a:hover, .nav-links-desktop a.active { color: #a7d3a6; border-bottom: 2px solid #a7d3a6; }
+
+        /* Mobile Dropdown */
+        .nav-links-mobile {
+            display: none; position: absolute; top: 100%; left: 0; width: 100%;
+            background-color: #2c5e2e; flex-direction: column; padding: 0; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+        .nav-links-mobile.active { display: flex; }
+        .nav-links-mobile a {
+            padding: 16px 20px; width: 100%; box-sizing: border-box; text-align: left;
+            color: white; text-decoration: none; font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 500;
+        }
+        .nav-links-mobile a:active { background-color: rgba(255,255,255,0.1); }
+        .nav-links-mobile a:last-child { border-bottom: none; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
         @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
-                flex-wrap: wrap;
-            }
-            .hamburger {
-                display: block;
-                order: 3;
-            }
-            .nav-auth {
-                order: 2;
-                margin-right: 1rem;
-            }
-            .nav-links {
-                display: none !important; 
-                width: 100%;
-                flex-direction: column;
-                order: 4;
-                padding-top: 1rem;
-                text-align: center;
-            }
-            .nav-links.active {
-                display: flex !important;
-            }
-            .nav-links a {
-                margin: 0.5rem 0;
-                width: 100%;
-                display: block;
-            }
+            .nav-links-desktop { display: none; } 
+            .hamburger { display: block; } 
         }
 
-        .content-wrapper {
-            max-width: 1300px;
-            margin: 5.5rem auto 1.5rem auto; 
-            padding: 1rem;
+        /* --- 5. DROPDOWNS --- */
+        .profile-menu, .language-menu { position: relative; display: inline-block; cursor: pointer; }
+        .dropdown-content {
+            display: none; position: absolute; background-color: #fff; min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1005;
+            right: 0; top: 130%; border-radius: 8px; overflow: hidden; text-align: left;
         }
+        .profile-menu:hover .dropdown-content, .language-menu:hover .dropdown-content { display: block; }
+        .dropdown-content a { color: black !important; padding: 12px 16px; display: block; text-decoration: none; border-bottom: 1px solid #f0f0f0; }
         
-        .goog-te-banner-frame.skiptranslate {
-            display: none !important;
-        } 
-        body {
-            top: 0px !important; 
+        /* CHAT BUTTON */
+        .float-chat-btn {
+            position: fixed; bottom: 20px; right: 20px; background: #4CAF50; color: white;
+            width: 55px; height: 55px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 2000; transition: transform 0.2s;
         }
-        #google_translate_element {
-            display: none; 
-        }
+        .float-chat-btn:active { transform: scale(0.9); }
+
+        /* --- GOOGLE TRANSLATE FIXES --- */
+        /* Only hide tooltips and highlights. DO NOT hide the banner itself. */
+        .goog-tooltip { display: none !important; }
+        .goog-tooltip:hover { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        font { background-color: transparent !important; box-shadow: none !important; }
     </style>
 
     {% block styles %}{% endblock %}
 </head>
 <body>
 
-    <div id="google_translate_element"></div>
+    <div id="google_translate_element" style="display:none;"></div>
 
-    <div id="preloader">
-        <div id="preloader-spinner"></div>
-        <p id="preloader-text">Loading... Please wait.</p>
-        <p id="preloader-fact"></p>
-    </div>
-    
-    <div class="loader-overlay" id="loading-spinner">
-        <div class="loader-spinner"></div>
-        <p class="loader-text" id="loader-text-id">Analyzing... Please wait.</p>
-    </div>
-
-    <nav class="navbar">
-        <a class="logo" href="{% url 'index' %}">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+    <nav class="navbar" id="mainNavbar">
+        
+        <a class="logo notranslate" href="{% url 'index' %}">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 35px; vertical-align: middle; margin-right: 8px;">
             Krishi Sakhi
         </a>
 
-        <div class="hamburger" onclick="toggleMobileMenu()">☰</div>
-
-        <div class="nav-links" id="navLinks">
+        <div class="nav-links-desktop">
             <a href="{% url 'index' %}">Home</a>
-            <a href="{% url 'analyze_field_dashboard' %}" style="font-weight: bold; color: #ffc107;">
-                Analyze Field 🧠
-            </a>
-            <a href="{% url 'crop_prices' %}" id="prices-link">Market Prices</a>
-            <a href="{% url 'schemes' %}" id="schemes-link">Schemes</a>
-            <a href="{% url 'weather' %}" id="weather-link">Weather</a>
-            <a href="{% url 'chatbot' %}">Chat</a>
+            <a href="{% url 'analyze_field_dashboard' %}">Analyze</a>
+            <a href="{% url 'crop_prices' %}">Prices</a>
+            <a href="{% url 'schemes' %}">Schemes</a>
+            <a href="{% url 'weather' %}">Weather</a>
         </div>
 
-        <div class="nav-auth">
-            {% if user.is_authenticated %}
-                
-                <div class="language-menu">
-                    <div class="lang-icon" style="font-size: 1.5rem;">🌐</div>
-                    <div class="dropdown-content">
-                        <a href="#" onclick="switchLanguage('en'); return false;">English</a>
-                        <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
-                        <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
-                        <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
-                        <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
-                    </div>
-                </div>
-
-                <div class="profile-menu">
-                    <div class="profile-pic">
-                        {{ user.username|first|upper|default:'K' }}
-                    </div>
-                    <div class="dropdown-content">
-                        <div class="dropdown-header">
-                            <strong>{{ user.first_name|default:user.username }}</strong>
-                            <span>{{ user.email }}</span>
+        <div class="nav-right-group">
+            <div class="nav-auth-icons">
+                {% if user.is_authenticated %}
+                    <div class="language-menu notranslate">
+                        <div class="lang-icon" style="font-size: 1.4rem; color: white;">🌐</div>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="switchLanguage('en'); return false;">English</a>
+                            <a href="#" onclick="switchLanguage('hi'); return false;">हिंदी (Hindi)</a>
+                            <a href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (Tamil)</a>
+                            <a href="#" onclick="switchLanguage('te'); return false;">తెలుగు (Telugu)</a>
+                            <a href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (Kannada)</a>
                         </div>
-                        <a href="{% url 'profile' %}">View Profile</a>
-                        <a href="{% url 'personalize' %}">My Farm</a>
-                        <a href="{% url 'history' %}">History</a>
-                        <a href="{% url 'logout' %}" class="logout-link">Logout</a>
                     </div>
-                </div>
+                    <div class="profile-menu">
+                        <div class="profile-pic" style="color: #2c5e2e; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #a7d3a6;">
+                            {{ user.username|first|upper|default:'K' }}
+                        </div>
+                        <div class="dropdown-content">
+                            <div style="padding: 10px; background: #f9f9f9; border-bottom: 1px solid #eee; font-size:0.9rem;">
+                                <strong>{{ user.first_name|default:user.username }}</strong>
+                            </div>
+                            <a href="{% url 'profile' %}">Profile</a>
+                            <a href="{% url 'personalize' %}">My Farm</a>
+                            <a href="{% url 'history' %}">History</a>
+                            <a href="{% url 'logout' %}" style="color: red !important;">Logout</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" style="color:white; border:1px solid white; padding:4px 12px; border-radius:15px; text-decoration:none; font-size:0.9rem;">Login</a>
+                {% endif %}
+            </div>
 
-            {% else %}
-                <a href="{% url 'login' %}" style="color:white; margin-right: 10px;">Login</a>
-                <a href="{% url 'signup' %}" style="color:white;">Sign Up</a>
-            {% endif %}
+            <div class="hamburger notranslate" onclick="toggleMobileMenu()">☰</div>
+        </div>
+
+        <div class="nav-links-mobile" id="mobileMenu">
+            <a href="{% url 'index' %}">🏠 Home</a>
+            <a href="{% url 'analyze_field_dashboard' %}">🧠 Analyze Field</a>
+            <a href="{% url 'crop_prices' %}">💰 Market Prices</a>
+            <a href="{% url 'schemes' %}">📜 Schemes</a>
+            <a href="{% url 'weather' %}">☁️ Weather</a>
         </div>
     </nav>
 
-    {% if messages %}
-        <div class="messages-container" style="padding: 0 1rem; max-width: 1300px; margin: 6.5rem auto -0.5rem auto;">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}" style="padding: 1rem; border-radius: 8px; font-weight: bold; background-color: #e8f5e9; color: #2c5e2e; border: 1px solid #a7d3a6; list-style: none; margin-bottom: 1rem;">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+    <div class="content-wrapper" style="width: 100%;">
+        {% block content %}{% endblock %}
+    </div>
 
-    <main class="content-wrapper">
-        {% block content %}
-        {% endblock %}
-    </main>
+    <a href="{% url 'chatbot' %}" class="float-chat-btn" title="Ask Sakhi">💬</a>
     
     {% block scripts %}{% endblock %}
 
     <script type="text/javascript">
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+        }
+
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'en',
@@ -275,66 +198,53 @@
                 autoDisplay: false
             }, 'google_translate_element');
         }
+
+        // --- ROBUST NAVBAR SHIFT ---
+        // This measures the Google Banner/Body Shift and pushes Navbar down
+        function adjustNavbar() {
+            const navbar = document.getElementById('mainNavbar');
+            const banner = document.querySelector('.goog-te-banner-frame');
+            const bodyStyle = window.getComputedStyle(document.body);
+            const htmlStyle = window.getComputedStyle(document.documentElement);
+            
+            let shift = 0;
+
+            // 1. Try measuring banner height directly
+            if (banner && banner.offsetHeight > 0) {
+                shift = banner.offsetHeight;
+            }
+
+            // 2. Try measuring body/html top shift (Google does this often)
+            if (shift === 0) {
+                shift = parseFloat(bodyStyle.top) || parseFloat(htmlStyle.top) || parseFloat(bodyStyle.marginTop) || parseFloat(htmlStyle.marginTop) || 0;
+            }
+
+            // 3. Apply the shift
+            if (shift > 0) {
+                navbar.style.top = shift + 'px';
+            } else {
+                navbar.style.top = '0px';
+            }
+        }
+
+        // Check frequently for changes
+        setInterval(adjustNavbar, 500);
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script>
-        // --- Aggressive Language Switcher ---
         function switchLanguage(langCode) {
-            // Set Cookie for ALL possible domains to ensure it sticks
             var cookieVal = "/en/" + langCode;
-            
             document.cookie = "googtrans=" + cookieVal + "; path=/";
             document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + window.location.hostname;
-            document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.127.0.0.1";
-            document.cookie = "googtrans=" + cookieVal + "; path=/; domain=.localhost";
             
-            // Call backend to update session/AI preference
             const csrfToken = '{{ csrf_token }}';
             fetch('{% url "personalize" %}', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrfToken
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
                 body: `language=${langCode}`
-            })
-            .then(() => {
-                // Force Reload with Query Parameter to trigger backend Translation
-                var newUrl = new URL(window.location.href);
-                newUrl.searchParams.set('lang', langCode);
-                window.location.href = newUrl.toString();
-            })
-            .catch(() => {
-                window.location.reload();
-            });
-        }
-
-        function toggleMobileMenu() {
-            document.getElementById('navLinks').classList.toggle('active');
-        }
-
-        const preloader = document.getElementById('preloader');
-        const factText = document.getElementById('preloader-fact');
-        const loaderText = document.getElementById('preloader-text');
-        
-        if (preloader && factText) {
-             const facts = [
-                "India is the world's largest producer of milk, pulses, and jute.",
-                "Agriculture employs nearly half of India's workforce."
-            ];
-            factText.innerHTML = facts[0];
-            
-            function hidePreloader() {
-                if (preloader) {
-                    preloader.style.opacity = '0'; 
-                    setTimeout(() => { preloader.style.display = 'none'; }, 500); 
-                }
-            }
-
-            if (document.readyState === 'complete') hidePreloader();
-            else window.addEventListener('load', hidePreloader);
-            setTimeout(hidePreloader, 3000); 
+            }).then(() => window.location.reload())
+              .catch(() => window.location.reload());
         }
     </script>
 </body>
