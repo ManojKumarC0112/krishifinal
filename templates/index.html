@@ -6,80 +6,84 @@
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/index.css' %}">
 <style>
-    /* 1. HERO LAYOUT */
-    .content-wrapper {
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+    /* 1. RESET LAYOUT */
+    .content-wrapper { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
 
+    /* 2. HERO SECTION */
     .hero {
-        min-height: 100vh;
-        padding-top: 70px; /* Space for navbar */
-        background-size: cover;
-        background-position: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        position: relative;
+        min-height: 100vh; padding-top: 80px; 
+        background-size: cover; background-position: center;
+        display: flex; align-items: center; justify-content: center;
+        text-align: center; position: relative;
     }
     
     .hero::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: 1;
+        content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4); z-index: 1;
     }
 
-    .hero-text {
-        position: relative;
-        z-index: 2;
-        color: white;
-    }
+    .hero-text { position: relative; z-index: 2; color: white; }
 
-    /* 2. MOBILE BUTTONS */
     @media (max-width: 768px) {
         .hero-text { width: 90%; padding: 1.5rem; }
         .hero-text h1 { font-size: 2rem; }
-        .hero-buttons {
-            display: flex; flex-direction: column; gap: 15px;
-            align-items: center; width: 100%;
-        }
+        .hero-buttons { display: flex; flex-direction: column; gap: 15px; align-items: center; width: 100%; }
         .hero-buttons .btn { width: 100%; margin: 0 !important; }
     }
 
-    /* 3. ONBOARDING POPUP STYLES */
-    .onboarding-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 3000; display: none;
-        align-items: center; justify-content: center;
-        backdrop-filter: blur(5px);
+    /* --- TOUR / SPOTLIGHT STYLES --- */
+    
+    /* The Spotlight Circle */
+    #tour-spotlight {
+        position: fixed;
+        border-radius: 8px; /* Matches button corners */
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85); /* The dark overlay "hole" trick */
+        z-index: 3000;
+        pointer-events: none; /* Let clicks pass through if needed */
+        transition: all 0.4s ease-in-out;
+        opacity: 0; /* Hidden initially */
+        border: 2px solid #fff; /* White glowing border */
     }
-    .onboarding-card {
-        background: white; width: 85%; max-width: 350px;
-        border-radius: 20px; padding: 30px 20px;
-        text-align: center; position: relative;
-        animation: slideUp 0.5s ease-out;
-    }
-    .ob-icon { font-size: 5rem; margin-bottom: 20px; display: block; animation: float 3s infinite; }
-    .ob-title { font-size: 1.5rem; color: #2c5e2e; margin-bottom: 10px; font-weight: 800; }
-    .ob-desc { font-size: 1.1rem; color: #555; margin-bottom: 25px; line-height: 1.4; }
-    .ob-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; }
-    .dot { width: 12px; height: 12px; background: #ddd; border-radius: 50%; transition: all 0.3s; }
-    .dot.active { background: #4CAF50; transform: scale(1.3); }
 
-    .ob-btn {
+    /* The Text Bubble */
+    #tour-tooltip {
+        position: fixed;
+        background: white;
+        width: 280px;
+        padding: 20px;
+        border-radius: 12px;
+        z-index: 3001;
+        opacity: 0;
+        transition: all 0.4s ease-in-out;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    
+    /* Tooltip Arrow */
+    #tour-tooltip::after {
+        content: "";
+        position: absolute;
+        border-width: 10px;
+        border-style: solid;
+        /* Position handled by JS */
+    }
+
+    .tt-title { font-size: 1.2rem; font-weight: bold; color: #2c5e2e; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
+    .tt-desc { font-size: 0.95rem; color: #555; line-height: 1.5; margin-bottom: 15px; }
+    
+    .tt-buttons { display: flex; justify-content: space-between; align-items: center; }
+    .tt-skip { color: #888; font-size: 0.9rem; text-decoration: underline; cursor: pointer; }
+    .tt-next {
         background: #4CAF50; color: white; border: none;
-        padding: 15px 40px; border-radius: 30px;
-        font-size: 1.1rem; font-weight: bold; cursor: pointer; width: 100%;
+        padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;
     }
-    .ob-skip { margin-top: 15px; font-size: 0.9rem; color: #888; cursor: pointer; text-decoration: underline; display: inline-block; }
-
-    @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    
+    /* Pulsing effect on spotlight */
+    @keyframes pulse-border {
+        0% { transform: scale(1); border-color: rgba(255,255,255,1); }
+        50% { transform: scale(1.05); border-color: rgba(255,255,255,0.5); }
+        100% { transform: scale(1); border-color: rgba(255,255,255,1); }
+    }
+    .spotlight-active { animation: pulse-border 2s infinite; }
 </style>
 {% endblock %}
 
@@ -91,13 +95,13 @@
         <p>What would you like to do today?</p>
         
         <div class="hero-buttons">
-            <a href="{% url 'analyze_field_dashboard' %}" class="btn">Analyze Field</a>
-            <a href="{% url 'crop_prices' %}" class="btn" style="background: #ffc107; color: #333; margin-left: 10px;">Check Prices</a>
+            <a href="{% url 'analyze_field_dashboard' %}" class="btn" id="btn-analyze">Analyze Field</a>
+            <a href="{% url 'crop_prices' %}" class="btn" id="btn-prices" style="background: #ffc107; color: #333; margin-left: 10px;">Check Prices</a>
         </div>
         
         <div style="margin-top: 30px;">
-            <a href="#" onclick="startOnboarding(); return false;" style="color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1rem; border-bottom: 1px dotted white; padding-bottom: 2px;">
-                ℹ️ How to use this app?
+            <a href="#" onclick="startTour(); return false;" style="color: rgba(255,255,255,0.9); text-decoration: none; font-size: 1rem; border-bottom: 1px dotted white; padding-bottom: 2px;">
+                🔄 Show Me How It Works
             </a>
         </div>
       {% else %}
@@ -112,56 +116,54 @@
     <p>© 2025 Krishi Sakhi | By MNV Nexus 🌾</p>
   </footer>
 
-  <div class="onboarding-overlay" id="onboardingModal">
-      <div class="onboarding-card">
-          <span class="ob-icon" id="obIcon">📸</span>
-          <div class="ob-title" id="obTitle">Identify Diseases</div>
-          <div class="ob-desc" id="obDesc">Take a photo...</div>
-          <div class="ob-dots">
-              <span class="dot active" id="dot0"></span>
-              <span class="dot" id="dot1"></span>
-              <span class="dot" id="dot2"></span>
-          </div>
-          <button class="ob-btn" onclick="nextSlide()" id="obBtn">Next</button>
-          <div class="ob-skip" onclick="closeOnboarding()">Skip Tutorial</div>
+  <a href="{% url 'chatbot' %}" id="btn-chat-widget" class="chat-widget-button" title="Chat with Sakhi" style="
+      position: fixed; bottom: 20px; right: 20px; 
+      background: #4CAF50; color: white; 
+      width: 60px; height: 60px; border-radius: 50%; 
+      display: flex; align-items: center; justify-content: center; 
+      font-size: 30px; text-decoration: none; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 2000;">
+      💬
+  </a>
+
+  <div id="tour-spotlight"></div>
+  <div id="tour-tooltip">
+      <div class="tt-title" id="ttTitle">📸 Scan Crop</div>
+      <div class="tt-desc" id="ttDesc">Click here to take a photo of your crop.</div>
+      <div class="tt-buttons">
+          <span class="tt-skip" onclick="endTour()">Skip</span>
+          <button class="tt-next" id="ttBtn" onclick="nextStep()">Next</button>
       </div>
   </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const allTranslations = {
+    // --- TOUR CONFIGURATION (MULTI-LANGUAGE) ---
+    const tourData = {
         'en': [
-            { icon: "📸", title: "1. Scan Your Crop", desc: "Click <b>'Analyze Field'</b>. Take a photo of your plant to detect diseases and get treatment." },
-            { icon: "🗣️", title: "2. Talk to Sakhi", desc: "Click the <b>'Chat'</b> button below. Press the Mic 🎤 and ask questions in your language!" },
-            { icon: "💰", title: "3. Get Money", desc: "Click <b>'Schemes'</b> to find government money and <b>'Market Prices'</b> for the best rates." }
+            { target: 'btn-analyze', title: "📸 Detect Disease", desc: "Click this button to take a photo of your sick plant. AI will tell you the medicine." },
+            { target: 'btn-chat-widget', title: "🗣️ Talk to Sakhi", desc: "Click here to speak in Hindi, Tamil, or Telugu. Ask any farming question!" },
+            { target: 'btn-prices', title: "💰 Market Prices", desc: "Click here to check the latest Mandi prices and Government Schemes." }
         ],
         'hi': [
-            { icon: "📸", title: "1. फसल स्कैन करें", desc: "<b>'Analyze Field'</b> पर क्लिक करें. अपनी फसल की फोटो लें और बीमारी का इलाज पाएं." },
-            { icon: "🗣️", title: "2. सखी से बात करें", desc: "नीचे <b>'Chat'</b> बटन दबाएं. माइक 🎤 का उपयोग करें और अपनी भाषा में सवाल पूछें!" },
-            { icon: "💰", title: "3. मुनाफा कमाएं", desc: "सरकारी योजनाओं के लिए <b>'Schemes'</b> देखें और सही दाम के लिए <b>'Market Prices'</b> चेक करें." }
+            { target: 'btn-analyze', title: "📸 बीमारी पहचानें", desc: "अपनी बीमार फसल की फोटो लेने के लिए यहाँ क्लिक करें।" },
+            { target: 'btn-chat-widget', title: "🗣️ सखी से बात करें", desc: "यहाँ क्लिक करके अपनी भाषा में सवाल पूछें।" },
+            { target: 'btn-prices', title: "💰 मंडी भाव", desc: "ताज़ा मंडी भाव और सरकारी योजनाओं के लिए यहाँ देखें।" }
         ],
+        // Add other languages as needed...
         'ta': [
-            { icon: "📸", title: "1. பயிரை ஸ்கேன் செய்யவும்", desc: "<b>'Analyze Field'</b> கிளிக் செய்யவும். நோயைக் கண்டறிய உங்கள் பயிரின் புகைப்படத்தை எடுக்கவும்." },
-            { icon: "🗣️", title: "2. சகியுடன் பேசுங்கள்", desc: "கீழே உள்ள <b>'Chat'</b> பட்டனை கிளிக் செய்யவும். மைக் 🎤 மூலம் உங்கள் மொழியில் கேள்வி கேளுங்கள்!" },
-            { icon: "💰", title: "3. அதிக லாபம்", desc: "அரசு மானியங்களுக்கு <b>'Schemes'</b> மற்றும் சந்தை விலைக்கு <b>'Market Prices'</b> பார்க்கவும்." }
-        ],
-        'te': [
-            { icon: "📸", title: "1. పంటను స్కాన్ చేయండి", desc: "<b>'Analyze Field'</b> క్లిక్ చేయండి. తెగుళ్ళను గుర్తించడానికి మీ పంట ఫోటో తీయండి." },
-            { icon: "🗣️", title: "2. సఖితో మాట్లాడండి", desc: "కింద ఉన్న <b>'Chat'</b> బటన్ నొక్కండి. మైక్ 🎤 ద్వారా మీ భాషలో ప్రశ్నలు అడగండి!" },
-            { icon: "💰", title: "3. లాభాలను పొందండి", desc: "ప్రభుత్వ పథకాల కోసం <b>'Schemes'</b> మరియు మార్కెట్ ధరల కోసం <b>'Market Prices'</b> చూడండి." }
-        ],
-        'kn': [
-            { icon: "📸", title: "1. ಬೆಳೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ", desc: "<b>'Analyze Field'</b> ಕ್ಲಿಕ್ ಮಾಡಿ. ರೋಗ ಪತ್ತೆಹಚ್ಚಲು ನಿಮ್ಮ ಬೆಳೆಯ ಫೋಟೋ ತೆಗೆಯಿರಿ." },
-            { icon: "🗣️", title: "2. ಸಖಿ ಜೊತೆ ಮಾತನಾಡಿ", desc: "ಕೆಳಗಿನ <b>'Chat'</b> ಬಟನ್ ಒತ್ತಿರಿ. ಮೈಕ್ 🎤 ಬಳಸಿ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಪ್ರಶ್ನೆ ಕೇಳಿ!" },
-            { icon: "💰", title: "3. ಲಾಭ ಪಡೆಯಿರಿ", desc: "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳಿಗೆ <b>'Schemes'</b> ಮತ್ತು ಮಾರುಕಟ್ಟೆ ದರಗಳಿಗೆ <b>'Market Prices'</b> ಪರಿಶೀಲಿಸಿ." }
+            { target: 'btn-analyze', title: "📸 நோய் கண்டறிதல்", desc: "நோயுற்ற பயிரை படம் எடுக்க இங்கே கிளிக் செய்யவும்." },
+            { target: 'btn-chat-widget', title: "🗣️ சகியுடன் பேசு", desc: "உங்கள் மொழியில் கேள்வி கேட்க இங்கே கிளிக் செய்யவும்." },
+            { target: 'btn-prices', title: "💰 சந்தை விலை", desc: "சந்தை விலை மற்றும் திட்டங்களை அறிய இங்கே கிளிக் செய்யவும்." }
         ]
     };
 
-    let currentSlide = 0;
+    let currentStep = 0;
     let currentLang = 'en';
-    const modal = document.getElementById('onboardingModal');
 
+    // 1. Detect Lang
     function detectLanguage() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('lang')) return urlParams.get('lang');
@@ -170,28 +172,94 @@
         return 'en';
     }
 
+    // 2. Auto Start
     window.addEventListener('load', () => {
         currentLang = detectLanguage();
-        if (!allTranslations[currentLang]) currentLang = 'en';
-        if (!localStorage.getItem('seenOnboarding_v4')) {
-            setTimeout(() => { startOnboarding(); }, 1000); 
+        if (!tourData[currentLang]) currentLang = 'en'; // Fallback
+        
+        if (!localStorage.getItem('seenTour_v1')) {
+            setTimeout(() => { startTour(); }, 1000);
         }
     });
 
-    function startOnboarding() { currentSlide = 0; updateSlide(); modal.style.display = 'flex'; }
-    function nextSlide() { if (currentSlide < 2) { currentSlide++; updateSlide(); } else { closeOnboarding(); } }
-    function closeOnboarding() { modal.style.display = 'none'; localStorage.setItem('seenOnboarding_v4', 'true'); }
-    function updateSlide() {
-        const data = allTranslations[currentLang][currentSlide];
-        document.getElementById('obIcon').innerText = data.icon;
-        document.getElementById('obTitle').innerText = data.title;
-        document.getElementById('obDesc').innerHTML = data.desc;
-        document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-        const btn = document.getElementById('obBtn');
-        const finishText = { 'en': "Start Farming 🚀", 'hi': "शुरू करें 🚀", 'ta': "தொடங்கவும் 🚀", 'te': "ప్రారంభించండి 🚀", 'kn': "ಪ್ರಾರಂಭಿಸಿ 🚀" };
-        const nextText = { 'en': "Next", 'hi': "अगला", 'ta': "அடுத்து", 'te': "తరువాత", 'kn': "ಮುಂದೆ" };
-        btn.innerText = (currentSlide === 2) ? (finishText[currentLang] || finishText['en']) : (nextText[currentLang] || nextText['en']);
-        btn.style.background = (currentSlide === 2) ? "#2c5e2e" : "#4CAF50";
+    // 3. Start Tour
+    function startTour() {
+        currentStep = 0;
+        document.getElementById('tour-spotlight').style.opacity = '1';
+        document.getElementById('tour-tooltip').style.opacity = '1';
+        document.getElementById('tour-spotlight').classList.add('spotlight-active');
+        document.body.style.overflow = "hidden"; // Disable scroll
+        showStep();
     }
+
+    // 4. Show Step Logic (The Maths)
+    function showStep() {
+        const data = tourData[currentLang][currentStep];
+        const targetEl = document.getElementById(data.target);
+        const spotlight = document.getElementById('tour-spotlight');
+        const tooltip = document.getElementById('tour-tooltip');
+
+        if (!targetEl) { endTour(); return; }
+
+        // Get coordinates
+        const rect = targetEl.getBoundingClientRect();
+        
+        // Move Spotlight
+        spotlight.style.width = (rect.width + 10) + 'px';
+        spotlight.style.height = (rect.height + 10) + 'px';
+        spotlight.style.top = (rect.top - 5) + 'px';
+        spotlight.style.left = (rect.left - 5) + 'px';
+
+        // Update Text
+        document.getElementById('ttTitle').innerText = data.title;
+        document.getElementById('ttDesc').innerText = data.desc;
+
+        // Position Tooltip
+        // Check if there is space below, else put above
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if (spaceBelow > 200) {
+            tooltip.style.top = (rect.bottom + 20) + 'px';
+            tooltip.style.left = (window.innerWidth / 2 - 140) + 'px'; // Center horizontally
+        } else {
+            tooltip.style.top = (rect.top - 180) + 'px'; // Put above
+            tooltip.style.left = (window.innerWidth / 2 - 140) + 'px';
+        }
+
+        // Button Text
+        const btn = document.getElementById('ttBtn');
+        if (currentStep === tourData[currentLang].length - 1) {
+            btn.innerText = "Finish";
+        } else {
+            btn.innerText = "Next";
+        }
+    }
+
+    // 5. Next Step
+    function nextStep() {
+        if (currentStep < tourData[currentLang].length - 1) {
+            currentStep++;
+            showStep();
+        } else {
+            endTour();
+        }
+    }
+
+    // 6. End Tour
+    function endTour() {
+        document.getElementById('tour-spotlight').style.opacity = '0';
+        document.getElementById('tour-tooltip').style.opacity = '0';
+        document.body.style.overflow = "auto"; // Re-enable scroll
+        setTimeout(() => {
+             document.getElementById('tour-spotlight').classList.remove('spotlight-active');
+        }, 500);
+        localStorage.setItem('seenTour_v1', 'true');
+    }
+    
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+        if (document.getElementById('tour-spotlight').style.opacity === '1') {
+            showStep();
+        }
+    });
 </script>
 {% endblock %}
