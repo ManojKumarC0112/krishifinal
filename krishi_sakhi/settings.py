@@ -140,4 +140,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://unexplaining-emmaline-intramural.ngrok-free.dev',
+    'https://*.onrender.com',
 ]
