@@ -1,0 +1,1 @@
+web: gunicorn krishi_sakhi.wsgi

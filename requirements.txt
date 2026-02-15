@@ -1,0 +1,9 @@
+django
+gunicorn
+whitenoise
+google-generativeai
+python-dotenv
+pillow
+requests
+beautifulsoup4
+numpy
