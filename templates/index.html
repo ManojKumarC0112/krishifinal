@@ -91,7 +91,7 @@
   <section class="hero">
     <div class="hero-text">
       {% if user.is_authenticated %}
-        <h1 id="greeting">{{ timeGreeting|default:"Namaste" }}, {{ user.username }}! 🌾</h1>
+        <h1 id="greeting">{{ timeGreeting|default:"Namaste" }}, {{ user.username }}! </h1>
         <p>What would you like to do today?</p>
         
         <div class="hero-buttons">

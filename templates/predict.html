@@ -4,6 +4,10 @@
 {% block title %}Disease Prediction{% endblock %}
 
 {% block content %}
+<div class="loader-overlay" id="loading-spinner">
+    <div class="loader-spinner"></div>
+    <div class="loader-text" id="loader-text-id">Analyzing... Result generated instantly.</div>
+</div>
 <style>
     /* CRITICAL FIXES EMBEDDED INLINE for Predict Wizard */
     .predict-container-wizard {
@@ -157,10 +161,8 @@
 {% block scripts %}
 <script>
     // --- !! CRITICAL FIX: HIDE PRELOADER IMMEDIATELY !! ---
-    const preloader = document.getElementById('preloader');
-    if (preloader) {
-        preloader.style.display = 'none';
-    }
+     
+    
     // --- END FIX ---
 
 
@@ -233,11 +235,10 @@
     const predictForm = document.querySelector('.predict-form');
     
     predictForm.addEventListener('submit', function() {
-        // Double-check a file is selected before showing loader
         if (fileInput.files.length > 0) {
-            // MOCK IMAGE FIX: Result is instant, but we show the spinner briefly
-            loaderText.innerText = 'Analyzing... Result generated instantly.';
-            spinner.style.display = 'flex';
+            // Use the standard loader overlay from global styles
+            const loader = document.getElementById('loading-spinner');
+            if (loader) loader.style.display = 'flex';
         } else {
             alert('Please upload an image first.');
             return false; // Stop the form from submitting
